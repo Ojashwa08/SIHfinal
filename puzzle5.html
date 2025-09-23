@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Map Puzzle</title>
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#111827; color:white; }
+h1 { text-align:center; color:orange; margin:1rem 0; }
+.container { display:flex; max-width:1200px; margin:0 auto; padding:1rem; gap:1rem; }
+.left-panel { width:300px; background:#1F2937; padding:1rem; border-radius:12px; overflow-y:auto; max-height:80vh; border:1px solid #374151; }
+.draggable-state { background:#374151; padding:0.5rem 1rem; margin:0.25rem 0; border-radius:9999px; cursor:grab; text-align:center; }
+.draggable-state:hover { background:#4B5563; }
+.right-panel { flex:1; display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+.state-box { background:#1F2937; border:1px solid #374151; border-radius:8px; height:80px; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:0.2s; text-align:center; font-size:0.8rem; padding:0.5rem; }
+.state-box.correct { background:#10B981; }
+.state-box.incorrect { background:#EF4444; }
+.modal-container { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.75); display:flex; justify-content:center; align-items:center; opacity:0; visibility:hidden; transition:0.3s; }
+.modal-container.show { opacity:1; visibility: visible; }
+.modal-content { background:#1F2937; padding:2rem; border-radius:12px; width:90%; max-width:500px; position:relative;}
+.close-btn { position:absolute; top:1rem; right:1rem; background:transparent; border:none; color:#ccc; font-size:1.5rem; cursor:pointer;}
+.close-btn:hover { color:white; }
+.hint { font-size:0.7rem; color:#9CA3AF; }
+</style>
+</head>
+<body>
+    <div class="card">
+        <h1>India Map Puzzle - Drag & Drop States & UTs</h1>
+    </div>
+<div style="display:flex; gap:1rem; align-items:stretch; height:80vh;">
+  <div id="states-list" 
+       style="width:300px; background:#1F2937; border-radius:12px; padding:1rem; overflow-y:auto;">
+  </div>
+  <div id="map-grid" 
+       style="flex:1; display:grid; grid-template-columns:repeat(6, 1fr); gap:1rem; background:#374151; border-radius:12px; padding:1rem; overflow:auto;">
+  </div>
+</div>
+
+<div class="modal-container" id="info-modal">
+    <div class="modal-content">
+        <button class="close-btn" id="close-modal-btn">&times;</button>
+        <h2 id="state-name" style="color:orange"></h2>
+        <p><strong>Capital:</strong> <span id="state-capital"></span></p>
+        <p><strong>Population:</strong> <span id="state-population"></span></p>
+        <p><strong>Area:</strong> <span id="state-area"></span> km²</p>
+        <p><strong>Literacy Rate:</strong> <span id="state-literacy"></span>%</p>
+        <p><strong>Main Languages:</strong> <span id="state-languages"></span></p>
+    </div>
+</div>
+<script>
+const indiaData = {
+ 
+  andhrapradesh: { name: 'Andhra Pradesh', capital: 'Amaravati', population: '53.15M', area: '162,975', literacy: '67.02', languages: 'Telugu', hint: 'Famous for Tirupati Temple' },
+  arunachalpradesh: { name: 'Arunachal Pradesh', capital: 'Itanagar', population: '1.52M', area: '83,743', literacy: '66.95', languages: 'Apatani, Nishi, Hindi', hint: 'Land of the Dawn-lit Mountains' },
+  assam: { name: 'Assam', capital: 'Dispur', population: '35.45M', area: '78,438', literacy: '72.19', languages: 'Assamese', hint: 'Famous for Tea Gardens and Kaziranga National Park' },
+  bihar: { name: 'Bihar', capital: 'Patna', population: '128.5M', area: '94,163', literacy: '61.80', languages: 'Hindi, Maithili', hint: 'Birthplace of Mahavir & Buddha' },
+  chhattisgarh: { name: 'Chhattisgarh', capital: 'Raipur', population: '30.94M', area: '135,191', literacy: '70.28', languages: 'Chhattisgarhi, Hindi', hint: 'Known for Bastar Dussehra and waterfalls' },
+  goa: { name: 'Goa', capital: 'Panaji', population: '1.54M', area: '3,702', literacy: '88.70', languages: 'Konkani', hint: 'Famous beaches and Portuguese heritage' },
+  gujarat: { name: 'Gujarat', capital: 'Gandhinagar', population: '68.43M', area: '196,024', literacy: '78.03', languages: 'Gujarati', hint: 'Rann of Kutch and Gir National Park' },
+  haryana: { name: 'Haryana', capital: 'Chandigarh', population: '28.2M', area: '44,212', literacy: '75.55', languages: 'Hindi, Punjabi', hint: 'Known for Kurukshetra & sports culture' },
+  himachalpradesh: { name: 'Himachal Pradesh', capital: 'Shimla', population: '7.44M', area: '55,673', literacy: '83.78', languages: 'Hindi', hint: 'Famous hill stations like Manali and Shimla' },
+  jharkhand: { name: 'Jharkhand', capital: 'Ranchi', population: '38.58M', area: '79,714', literacy: '66.41', languages: 'Hindi, Santhali', hint: 'Famous for waterfalls and mineral wealth' },
+  karnataka: { name: 'Karnataka', capital: 'Bengaluru', population: '67.65M', area: '191,791', literacy: '75.36', languages: 'Kannada', hint: 'Silicon Valley of India' },
+  kerala: { name: 'Kerala', capital: 'Thiruvananthapuram', population: '35.9M', area: '38,852', literacy: '94.00', languages: 'Malayalam', hint: 'God’s Own Country and backwaters' },
+  madhyapradesh: { name: 'Madhya Pradesh', capital: 'Bhopal', population: '85M', area: '308,252', literacy: '69.32', languages: 'Hindi', hint: 'Known as Heart of India; Khajuraho Temples' },
+  maharashtra: { name: 'Maharashtra', capital: 'Mumbai', population: '124.7M', area: '307,713', literacy: '82.34', languages: 'Marathi', hint: 'Bollywood & Gateway of India' },
+  manipur: { name: 'Manipur', capital: 'Imphal', population: '3.12M', area: '22,327', literacy: '79.85', languages: 'Meitei, Hindi', hint: 'Famous for classical dance – Manipuri' },
+  meghalaya: { name: 'Meghalaya', capital: 'Shillong', population: '3.44M', area: '22,429', literacy: '74.43', languages: 'Khasi, Garo', hint: 'Abode of Clouds & living root bridges' },
+  mizoram: { name: 'Mizoram', capital: 'Aizawl', population: '1.2M', area: '21,081', literacy: '91.33', languages: 'Mizo', hint: 'Famous for lush hills and festivals' },
+  nagaland: { name: 'Nagaland', capital: 'Kohima', population: '2.27M', area: '16,579', literacy: '80.11', languages: 'Nagamese, English', hint: 'Hornbill Festival is famous here' },
+  odisha: { name: 'Odisha', capital: 'Bhubaneswar', population: '46.81M', area: '155,707', literacy: '72.87', languages: 'Odia', hint: 'Famous for Konark Sun Temple & Puri Jagannath' },
+  punjab: { name: 'Punjab', capital: 'Chandigarh', population: '30.14M', area: '50,362', literacy: '75.84', languages: 'Punjabi', hint: 'Known as Land of Five Rivers' },
+  rajasthan: { name: 'Rajasthan', capital: 'Jaipur', population: '80.79M', area: '342,239', literacy: '66.11', languages: 'Hindi, Rajasthani', hint: 'Famous forts & Thar Desert' },
+  sikkim: { name: 'Sikkim', capital: 'Gangtok', population: '0.71M', area: '7,096', literacy: '81.42', languages: 'Nepali, Bhutia', hint: 'Known for monasteries & Kanchenjunga' },
+  tamilnadu: { name: 'Tamil Nadu', capital: 'Chennai', population: '83.69M', area: '130,060', literacy: '80.09', languages: 'Tamil', hint: 'Land of temples & classical music' },
+  telangana: { name: 'Telangana', capital: 'Hyderabad', population: '39.36M', area: '112,077', literacy: '72.80', languages: 'Telugu', hint: 'Famous for Charminar and biryani' },
+  tripura: { name: 'Tripura', capital: 'Agartala', population: '4.12M', area: '10,486', literacy: '87.22', languages: 'Bengali, Kokborok', hint: 'Famous for Ujjayanta Palace' },
+  uttarakhand: { name: 'Uttarakhand', capital: 'Dehradun', population: '11.07M', area: '53,483', literacy: '78.82', languages: 'Hindi', hint: 'Land of Himalayas & yoga centers' },
+  uttarpradesh: { name: 'Uttar Pradesh', capital: 'Lucknow', population: '241M', area: '240,928', literacy: '67.68', languages: 'Hindi, Urdu', hint: 'Taj Mahal is located here' },
+  westbengal: { name: 'West Bengal', capital: 'Kolkata', population: '100.2M', area: '88,752', literacy: '76.26', languages: 'Bengali', hint: 'Famous for Howrah Bridge & Darjeeling' },
+
+ 
+  andamanandnicobar: { name: 'Andaman and Nicobar Islands', capital: 'Port Blair', population: '0.38M', area: '8,249', literacy: '86.27', languages: 'Hindi, Bengali', hint: 'Cellular Jail & beautiful islands' },
+  chandigarh: { name: 'Chandigarh', capital: 'Chandigarh', population: '1.16M', area: '114', literacy: '86.43', languages: 'Hindi, Punjabi', hint: 'Planned city by Le Corbusier' },
+  dadraandnagarhavelianddamananddiu: { name: 'Dadra and Nagar Haveli and Daman and Diu', capital: 'Daman', population: '0.61M', area: '603', literacy: '76.24', languages: 'Gujarati, Hindi', hint: 'Tiny UT with Portuguese legacy' },
+  delhi: { name: 'Delhi', capital: 'New Delhi', population: '32.17M', area: '1,484', literacy: '86.21', languages: 'Hindi, English', hint: 'Capital city of India' },
+  lakshadweep: { name: 'Lakshadweep', capital: 'Kavaratti', population: '0.07M', area: '32', literacy: '92.28', languages: 'Malayalam, Mahl', hint: 'Smallest island UT' },
+  puducherry: { name: 'Puducherry', capital: 'Puducherry', population: '1.49M', area: '479', literacy: '85.85', languages: 'Tamil, Telugu, Malayalam, French', hint: 'French colonial influence & beaches' }
+};
+
+const statesListDiv=document.getElementById('states-list');
+const mapGrid=document.getElementById('map-grid');
+const infoModal=document.getElementById('info-modal');
+const closeModalBtn=document.getElementById('close-modal-btn');
+const stateNameH2=document.getElementById('state-name');
+const stateDataSpans={
+capital:document.getElementById('state-capital'),
+population:document.getElementById('state-population'),
+area:document.getElementById('state-area'),
+literacy:document.getElementById('state-literacy'),
+languages:document.getElementById('state-languages')
+};
+let draggedStateId=null;
+
+Object.keys(indiaData).sort().forEach(key=>{
+    const div=document.createElement('div');
+    div.className='draggable-state';
+    div.textContent=indiaData[key].name;
+    div.setAttribute('draggable',true);
+    div.setAttribute('data-state-id',key);
+    statesListDiv.appendChild(div);
+    div.addEventListener('dragstart',e=>{draggedStateId=key;});
+    div.addEventListener('dragend',e=>{draggedStateId=null;});
+});
+
+const keysShuffled=Object.keys(indiaData).sort(()=>Math.random()-0.5);
+keysShuffled.forEach(key=>{
+    const box=document.createElement('div');
+    box.className='state-box';
+    box.setAttribute('data-state-id',key);
+    box.innerHTML=`<div class="hint">${indiaData[key].hint}</div>`;
+    mapGrid.appendChild(box);
+
+    box.addEventListener('dragover',e=>e.preventDefault());
+    box.addEventListener('drop',e=>{
+        e.preventDefault();
+        if(draggedStateId===key){
+            box.classList.add('correct');
+            box.innerHTML=indiaData[key].name;
+            document.querySelector(`[data-state-id="${draggedStateId}"].draggable-state`).style.display='none';
+            const state=indiaData[key];
+            stateNameH2.textContent=state.name;
+            stateDataSpans.capital.textContent=state.capital;
+            stateDataSpans.population.textContent=state.population;
+            stateDataSpans.area.textContent=state.area;
+            stateDataSpans.literacy.textContent=state.literacy;
+            stateDataSpans.languages.textContent=state.languages;
+            infoModal.classList.add('show');
+        } else {
+            box.classList.add('incorrect');
+            setTimeout(()=>box.classList.remove('incorrect'),1000);
+        }
+        draggedStateId=null;
+    });
+});
+
+closeModalBtn.addEventListener('click',()=>infoModal.classList.remove('show'));
+infoModal.addEventListener('click',e=>{if(e.target===infoModal)infoModal.classList.remove('show');});
+</script>
+</body>
+</html>

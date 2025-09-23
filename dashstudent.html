@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Student Dashboard</title>
+<style>
+body {
+  background: #0a192f;
+  color: #fff;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  max-width: 1000px;
+  margin: auto;
+  padding: 20px;
+}
+
+.navbar {
+  background: #112240;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.3s, color 0.3s;
+}
+.navbar h1 { margin: 0; font-size: 20px; color: #4fc3f7; }
+.navbar a, .theme-toggle-navbar {
+  text-decoration: none;
+  background: #4fc3f7;
+  color: #0a192f;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: 0.3s;
+  margin-left: 10px;
+  cursor: pointer;
+}
+.navbar a:hover, .theme-toggle-navbar:hover { background: #1dd1a1; color: #fff; }
+
+.box { 
+  border-radius: 16px; 
+  box-shadow: 0 6px 18px rgba(0,0,0,0.3); 
+  padding: 20px; 
+  margin-bottom: 25px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.greeting-box { background: linear-gradient(135deg, #4fc3f7, #1dd1a1); text-align: center; }
+.greeting-box h2 { font-size: 22px; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.greeting-box .username { font-weight: bold; }
+.greeting-box p { font-size: 14px; opacity: 0.9; }
+
+.extra-features-box { background: #112240; }
+.feature { background: #1c2d4a; margin-bottom: 15px; padding: 15px; }
+.feature h3 { margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid #4fc3f7; display: inline-block; padding-bottom: 3px; }
+.search-box { display: flex; }
+.search-box input { flex: 1; padding: 8px; border-radius: 6px 0 0 6px; border: none; outline: none; }
+.search-box button { background: #4fc3f7; border: none; padding: 8px 12px; border-radius: 0 6px 6px 0; cursor: pointer; font-weight: bold; }
+
+.notifications, .leaderboard { list-style: none; padding: 0; font-size: 14px; }
+.notifications li, .leaderboard li { background: #243b61; padding: 6px 10px; border-radius: 8px; margin: 5px 0; }
+
+.demo-leaderboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+.demo-box, .leaderboard-box { flex: 1 1 300px; text-align: center; padding: 20px; }
+.demo-box h2, .leaderboard-box h2 { font-size: 22px; margin-bottom: 15px; color: #4fc3f7; }
+.demo-links { display: flex; flex-direction: column; gap: 12px; }
+.demo-links a { text-decoration: none; background: #4fc3f7; color: #0a192f; padding: 12px; border-radius: 10px; font-weight: bold; transition: 0.3s ease; }
+.demo-links a:hover { background: #1dd1a1; color: #fff; transform: scale(1.05); }
+
+.footer { background: #112240; color: #fff; padding: 40px 20px 20px; font-family: Arial, sans-serif; transition: background 0.3s, color 0.3s; }
+.footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
+.footer-section h3 { margin-bottom: 10px; font-size: 18px; border-bottom: 2px solid #4fc3f7; display: inline-block; padding-bottom: 5px; }
+.footer-section p, .footer-section ul { font-size: 14px; line-height: 1.6; }
+.footer-section ul { list-style: none; padding: 0; }
+.footer-section ul li { margin: 5px 0; }
+.footer-section ul li a { color: #bbb; text-decoration: none; transition: color 0.3s; }
+.footer-section ul li a:hover { color: #4fc3f7; }
+.social-links a { margin-right: 10px; font-size: 20px; color: #bbb; text-decoration: none; transition: color 0.3s; }
+.social-links a:hover { color: #4fc3f7; }
+.footer-bottom { text-align: center; margin-top: 20px; font-size: 13px; border-top: 1px solid #444; padding-top: 10px; color: #bbb; }
+
+body.light-mode {
+  background: #f1f1f1;
+  color: #000;
+}
+body.light-mode .navbar { background: #d1d1d1; color: #000; }
+body.light-mode .navbar h1 { color: #0a192f; }
+body.light-mode .navbar a, body.light-mode .theme-toggle-navbar { background: #0a7dff; color: #fff; }
+body.light-mode .navbar a:hover, body.light-mode .theme-toggle-navbar:hover { background: #4fc3f7; color: #0a192f; }
+body.light-mode .footer { background: #d1d1d1; color: #000; }
+body.light-mode .footer-section ul li a { color: #0a192f; }
+body.light-mode .footer-section ul li a:hover { color: #0a7dff; }
+body.light-mode .greeting-box { background: #81cfe0; color: #0a192f; }
+body.light-mode .extra-features-box { background: #cfd8e0; color: #0a192f; }
+body.light-mode .feature { background: #b0c4de; color: #0a192f; }
+body.light-mode .demo-box, body.light-mode .leaderboard-box { background: #b0c4de; color: #0a192f; }
+body.light-mode .demo-links a { background: #0a7dff; color: #fff; }
+body.light-mode .demo-links a:hover { background: #4fc3f7; color: #0a192f; }
+body.light-mode .notifications li, body.light-mode .leaderboard li { background: #dbe2ef; color: #0a192f; }
+</style>
+</head>
+<body class="dark-mode">
+<div class="navbar">
+  <h1>📚 Student Portal</h1>
+  <div>
+    <button class="theme-toggle-navbar" onclick="toggleTheme()">🌙 Dark Mode</button>
+    <a href="index.html">Back to Login</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="greeting-box box">
+    <h2>Welcome back, <span class="username">Ojashwa Mishra</span> 🎉</h2>
+    <p>Class: 12 • Section: A • Roll No: 11</p>
+  </div>
+
+  <div class="extra-features-box box">
+    <h2>✨ Extra Features</h2>
+    <div class="feature">
+      <h3>🔍 Quick Search</h3>
+      <div class="search-box">
+        <input type="text" placeholder="Search notes, assignments..." />
+        <button>Go</button>
+      </div>
+    </div>
+    <div class="feature">
+      <h3>📢 Notifications</h3>
+      <ul class="notifications">
+        <li>Science Quiz on 25 Sept</li>
+        <li>Math Assignment due tomorrow</li>
+        <li>Annual Sports Meet next week</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="demo-leaderboard">
+    <div class="demo-box box">
+      <h2>🎮 Demo Zone</h2>
+      <div class="demo-links">
+        <a href="demogames.html">🕹 Demo Games</a>
+        <a href="demoquiz.html">❓ Demo Quiz</a>
+        <a href="demopuzzle.html">🧩 Demo Puzzle</a>
+      </div>
+    </div>
+
+    <div class="leaderboard-box box">
+      <h2>🏆 Leaderboard</h2>
+      <ol class="leaderboard">
+        <li>🥇 Laxmi (Roll no. 9)</li>
+        <li>🥈 Aanya (Roll no. 10)</li>
+        <li>🥉 Samridhi (Roll no. 8)</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-section">
+      <h3>About</h3>
+      <p>Student Portal for Classes 6–12. Access study materials, assignments, exams, and progress reports in one place.</p>
+    </div>
+    <div class="footer-section">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Subjects</a></li>
+        <li><a href="#">Assignments</a></li>
+        <li><a href="#">Exams</a></li>
+      </ul>
+    </div>
+    <div class="footer-section">
+      <h3>Contact</h3>
+      <p>Email: support@schoolportal.com</p>
+      <p>Phone: +91-9876543210</p>
+      <p>Address: Sagar Public School, Bhopal</p>
+    </div>
+    <div class="footer-section">
+      <h3>Follow Us</h3>
+      <div class="social-links">
+        <a href="#">🌐</a>
+        <a href="#">📘</a>
+        <a href="#">🐦</a>
+        <a href="#">📸</a>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 School Portal. All Rights Reserved.</p>
+  </div>
+</footer>
+
+<script>
+function toggleTheme(){
+  const body = document.body;
+  const btn = document.querySelector(".theme-toggle-navbar");
+  if(body.classList.contains("dark-mode")){
+    body.classList.remove("dark-mode");
+    body.classList.add("light-mode");
+    btn.textContent = "🌙 Dark Mode";
+  } else {
+    body.classList.remove("light-mode");
+    body.classList.add("dark-mode");
+    btn.textContent = "☀ Light Mode";
+  }
+}
+</script>
+</body>
+</html>

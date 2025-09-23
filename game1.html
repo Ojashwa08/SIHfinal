@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Angle Shooter — Trigonometry Game</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#9aa4b2;--green:#22c55e}
+    html,body{height:100%;margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,'Helvetica Neue',Arial}
+    body{background:linear-gradient(180deg,#071024 0%, #07172a 60%);color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:20px}
+    .wrap{width:1100px;max-width:100%;display:grid;grid-template-columns:640px 1fr;gap:20px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.7);border:1px solid rgba(255,255,255,0.03)}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+    h1{font-size:20px;margin:0}
+    .game-area{position:relative;height:480px;border-radius:8px;overflow:hidden;background:linear-gradient(180deg,#7bb7ff0a,#1a3a5a);border:1px solid rgba(255,255,255,0.04)}
+    canvas#play{display:block;background:linear-gradient(180deg,#0f2a45 0%, #05233a 60%);width:100%;height:100%}
+    .hud{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .btn{background:linear-gradient(180deg,var(--accent),#5b21b6);padding:8px 12px;border-radius:8px;color:white;border:none;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .controls{display:flex;flex-direction:column;gap:12px}
+    .slider-row{display:flex;gap:10px;align-items:center}
+    input[type=range]{width:100%}
+    .panel{display:flex;flex-direction:column;gap:10px}
+    .small{font-size:13px;color:var(--muted)}
+    .problem{background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent);padding:10px;border-radius:8px}
+    .triangle{width:220px;height:220px;background:conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.02), transparent);border-radius:14px;display:flex;align-items:center;justify-content:center}
+    .stats{display:flex;gap:8px;align-items:center}
+    .stat{background:rgba(255,255,255,0.02);padding:8px 10px;border-radius:8px;font-weight:600}
+    footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:13px}
+    .hint-box{background:rgba(255,255,255,0.01);padding:10px;border-radius:8px;color:var(--muted)}
+    .radical{font-family: 'Times New Roman', serif; font-weight:700}
+    @media(max-width:980px){.wrap{grid-template-columns:1fr}} 
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,#3b82f6,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:800">∠</div>
+        <div>
+          <h1>Angle Shooter — Trigonometry Game</h1>
+          <div class="small">Aim with the right angle (based on trigonometric ratio) and hit the target. Class 10 friendly.</div>
+        </div>
+      </header>
+
+      <div class="game-area card" id="gameArea">
+        <canvas id="play" width="960" height="420"></canvas>
+      </div>
+
+      <div class="hud">
+        <div class="stats">
+          <div class="stat">Level <span id="level">1</span></div>
+          <div class="stat">Score <span id="score">0</span></div>
+          <div class="stat">Streak <span id="streak">0</span></div>
+        </div>
+        <div style="flex:1"></div>
+        <button class="btn" id="newProblem">New Problem</button>
+        <button class="btn ghost" id="giveUp">Show Answer</button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;align-items:flex-start">
+        <div style="flex:1" class="controls card">
+          <div class="problem">
+            <div class="small">Problem</div>
+            <div id="problemText" style="font-size:18px;font-weight:700;margin-top:6px">—</div>
+          </div>
+
+          <div>
+            <div class="small">Choose angle (degrees)</div>
+            <div class="slider-row">
+              <input type="range" id="angleRange" min="0" max="90" value="30">
+              <div style="width:60px;text-align:center;font-weight:700"> <span id="angleValue">30</span>°</div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button class="btn" id="shootBtn">Shoot</button>
+              <button class="btn ghost" id="hintBtn">Hint</button>
+              <button class="btn ghost" id="showTriangle">Show triangle</button>
+            </div>
+          </div>
+
+          <div id="message" class="small" style="margin-top:8px;color:var(--muted)"></div>
+        </div>
+
+        <div style="width:300px;display:flex;flex-direction:column;gap:10px">
+          <div class="card" style="padding:12px">
+            <div class="small">Triangle / Unit Visual</div>
+            <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+              <div class="triangle" id="triangleCanvasHolder">
+                <canvas id="tri" width="200" height="200"></canvas>
+              </div>
+              <div style="flex:1">
+                <div class="small">Given</div>
+                <div id="givenText" style="font-weight:700;margin-top:6px">—</div>
+                <div class="hint-box" id="hintBox" style="margin-top:8px;display:none"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="padding:12px;text-align:center">
+            <div style="font-weight:700;font-size:16px">Tips</div>
+            <div class="small" style="margin-top:6px">Common exact values used: 30°, 45°, 60° (√3/2, 1/2, √2/2). Try to recognise radicals.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <div>Made for Class 10 — Practice trigonometric ratios</div>
+        <div><span id="feedback" class="small">Good luck!</span></div>
+      </footer>
+    </div>
+
+    <!-- Right column: instructions, levels -->
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <h2 style="margin:0">How to play</h2>
+        <div class="small" style="margin-top:6px">You are given a trigonometric ratio in a triangle (e.g., opposite and hypotenuse). Choose the angle that satisfies the ratio and shoot. Aim line will show where your shot goes.
+        </div>
+      </div>
+
+      <div>
+        <h3 style="margin:0;font-size:16px">Levels & Difficulty</h3>
+        <div class="small" style="margin-top:6px">Each level increases the variety of formats (radicals, decimals, mixed). Perfect hits increase streaks and give bonus points.</div>
+      </div>
+
+      <div>
+        <h3 style="margin:0;font-size:16px">Scoring</h3>
+        <div class="small" style="margin-top:6px">Hit: +100 (perfect +150). Miss: -20. Show answer: -50. Streak multiplier adds to score.</div>
+      </div>
+
+      <div>
+        <h3 style="margin:0;font-size:16px">Examples</h3>
+        <div class="small" style="margin-top:6px">"Find angle if opposite = √3, hypotenuse = 2." → sinθ = √3/2 → θ = 60°</div>
+      </div>
+
+      <div style="margin-top:6px">
+        <button class="btn" id="resetBtn">Reset Score</button>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+// --- Utility functions ---
+const toDeg = r => r*180/Math.PI;
+const toRad = d => d*Math.PI/180;
+function approxEqual(a,b,tol=1.5){return Math.abs(a-b)<=tol} // degrees tolerance
+
+// Common exact trig values for nice display
+const COMMON = [30,45,60,15,75];
+const RAD_TYPES = {
+  30: {sin:"1/2",cos:"\u221A3/2"},
+  45: {sin:"\u221A2/2",cos:"\u221A2/2"},
+  60: {sin:"\u221A3/2",cos:"1/2"},
+  15: {sin:"(\u221A6-\u221A2)/4",cos:"(\u221A6+\u221A2)/4"},
+  75: {sin:"(\u221A6+\u221A2)/4",cos:"(\u221A6-\u221A2)/4"}
+};
+
+let state = {
+  level:1,score:0,streak:0,
+  current: null
+};
+
+// Canvas setup
+const canvas = document.getElementById('play');
+const ctx = canvas.getContext('2d');
+const TRI = document.getElementById('tri');
+const tctx = TRI.getContext('2d');
+
+function resizeCanvas(){
+  // keep internal fixed size; CSS scales
+}
+
+function randChoice(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function formatValue(num,deg){
+  // show radicals for common angles if numerator matches
+  if(COMMON.includes(deg)){
+    const s = RAD_TYPES[deg].sin;
+    const h = '2';
+    return {text:`opposite = ${s}, hypotenuse = 2`, plain: null};
+  }
+  // otherwise decimal
+  return {text:`opposite = ${Number(num).toFixed(3)}, hypotenuse = 2`, plain:null};
+}
+
+function makeProblem(level){
+  // choose angle from common angles first, then introduce decimals
+  const deg = (Math.random()<0.75 || level<3) ? randChoice(COMMON) : Math.floor(Math.random()*76)+5;
+  const rad = toRad(deg);
+  const sinv = Math.sin(rad);
+  const hyp = 2;
+  const opp = sinv*hyp;
+  // show problem text nicely
+  const display = formatValue(opp,deg);
+  state.current = {deg,rad,opp,hyp,display};
+  // target in scene coords
+  const scale = 140; // scene scaling for hypotenuse
+  const hyp_scene = scale; // in px
+  const opp_scene = sinv*hyp_scene;
+  const adj_scene = Math.cos(rad)*hyp_scene;
+  const x = adj_scene + 60; // offset from left
+  const y = canvas.height - 60 - opp_scene; // invert y
+  state.current.scene = {x,y,hyp_scene,opp_scene,adj_scene};
+}
+
+function renderScene(playerAngle=null){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  // background grid
+  ctx.fillStyle = '#052437';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // draw ground
+  ctx.fillStyle = '#0b3b57';
+  ctx.fillRect(0,canvas.height-50,canvas.width,50);
+
+  // cannon base
+  const baseX = 60, baseY = canvas.height-50;
+  ctx.save();
+  ctx.translate(baseX, baseY);
+  // draw cannon
+  ctx.fillStyle = '#243b55';
+  ctx.beginPath(); ctx.arc(0,0,18,0,Math.PI*2); ctx.fill();
+  // barrel
+  ctx.save();
+  const angle = playerAngle!=null ? toRad(playerAngle) : toRad(30);
+  ctx.rotate(-angle);
+  ctx.fillStyle = '#7c3aed';
+  ctx.fillRect(10,-6,80,12);
+  ctx.restore();
+  ctx.restore();
+
+  // draw target
+  if(state.current){
+    const t = state.current.scene;
+    ctx.beginPath(); ctx.fillStyle='#ff8b8b'; ctx.arc(t.x,t.y,12,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(t.x,t.y,20,0,Math.PI*2); ctx.stroke();
+  }
+
+  // draw aim line if playerAngle provided
+  if(playerAngle!=null){
+    ctx.save(); ctx.translate(baseX, baseY);
+    const rad = toRad(playerAngle);
+    ctx.strokeStyle = 'rgba(255,255,255,0.18)'; ctx.setLineDash([6,8]); ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,0);
+    const L = 1000; ctx.lineTo(Math.cos(rad)*L, -Math.sin(rad)*L);
+    ctx.stroke(); ctx.restore();
+  }
+
+  // little HUD labels
+  ctx.fillStyle='#cfefff'; ctx.font='13px Inter'; ctx.fillText('Cannon', 36, canvas.height-25);
+
+  // target distance label
+  if(state.current){
+    ctx.fillStyle='#e6eef8'; ctx.font='12px Inter'; ctx.fillText('Target', state.current.scene.x-22, state.current.scene.y-18);
+  }
+}
+
+function renderTriangle(show=true){
+  tctx.clearRect(0,0,TRI.width,TRI.height);
+  const cW=TRI.width, cH=TRI.height; tctx.fillStyle='#071422'; tctx.fillRect(0,0,cW,cH);
+  if(!state.current) return;
+  const s = state.current.scene;
+  // draw triangle scaled inside canvas
+  const origin = {x:40,y:cH-30};
+  const scale = 0.9 * (cW-80) / state.current.scene.hyp_scene;
+  const hyp = state.current.scene.hyp_scene*scale;
+  const adj = state.current.scene.adj_scene*scale;
+  const opp = state.current.scene.opp_scene*scale;
+  // points
+  const A = origin;
+  const B = {x:origin.x + adj, y: origin.y};
+  const C = {x:origin.x + adj, y: origin.y - opp};
+  // draw
+  tctx.strokeStyle='#9fd3ff'; tctx.lineWidth=2; tctx.beginPath(); tctx.moveTo(A.x,A.y); tctx.lineTo(B.x,B.y); tctx.lineTo(C.x,C.y); tctx.closePath(); tctx.stroke();
+  // hypotenuse
+  tctx.beginPath(); tctx.moveTo(C.x,C.y); tctx.lineTo(A.x,A.y); tctx.stroke();
+  // angle arc
+  tctx.strokeStyle='rgba(255,255,255,0.24)'; tctx.beginPath(); tctx.arc(A.x,A.y,28,0,-state.current.rad,true); tctx.stroke();
+  // labels
+  tctx.fillStyle='#e8f6ff'; tctx.font='12px Inter'; tctx.fillText('θ = ?', A.x+12, A.y-6);
+  // display given values
+  const gText = state.current.display.text || `opp = ${state.current.opp.toFixed(3)}, hyp = ${state.current.hyp}`;
+  document.getElementById('givenText').innerHTML = gText;
+}
+
+function showHint(){
+  const box = document.getElementById('hintBox');
+  if(!state.current) return;
+  const val = Math.sin(state.current.rad).toFixed(5);
+  box.style.display='block';
+  box.innerHTML = `<div class=small>sin θ = opposite/hypotenuse = ${Number(state.current.opp/state.current.hyp).toFixed(5)}</div>`;
+}
+
+// check hit: distance from target to aim line
+function checkHit(angle){
+  const base = {x:60,y:canvas.height-50};
+  const rad = toRad(angle);
+  const dir = {x:Math.cos(rad), y:-Math.sin(rad)}; // unit
+  const T = state.current.scene;
+  // projection length from base to perpendicular foot
+  const vx = T.x - base.x, vy = T.y - base.y;
+  const proj = vx*dir.x + vy*dir.y;
+  if(proj < 0) return false;
+  const closest = {x: base.x + dir.x*proj, y: base.y + dir.y*proj};
+  const dist = Math.hypot(closest.x - T.x, closest.y - T.y);
+  return dist <= 18 + Math.max(0, 22 - state.level*2); // tolerance decreases with level
+}
+
+function animateShot(angle, onDone){
+  const base = {x:60,y:canvas.height-50};
+  const rad = toRad(angle);
+  const dir = {x:Math.cos(rad), y:-Math.sin(rad)};
+  let t=0; const speed=8; const step=1/60;
+  const trail = [];
+  const interval = setInterval(()=>{
+    t += step*speed*4;
+    const pos = {x: base.x + dir.x * t, y: base.y + dir.y * t};
+    trail.push(pos);
+    renderScene(angle);
+    // draw trail
+    ctx.fillStyle = '#ffd1a9'; for(let p of trail.slice(-30)){ ctx.beginPath(); ctx.arc(p.x,p.y,3,0,Math.PI*2); ctx.fill(); }
+    // draw projectile
+    ctx.beginPath(); ctx.fillStyle='#ffdf5d'; ctx.arc(pos.x,pos.y,8,0,Math.PI*2); ctx.fill();
+    // stop when offscreen
+    if(pos.x>canvas.width+50 || pos.y>canvas.height+50 || pos.y<-50){ clearInterval(interval); onDone(); }
+  },16);
+}
+
+// Game actions
+function newProblem(){
+  makeProblem(state.level);
+  document.getElementById('problemText').innerText = state.current.display.text;
+  document.getElementById('hintBox').style.display='none';
+  renderTriangle(); renderScene(Number(document.getElementById('angleRange').value));
+}
+
+function shoot(){
+  const angle = Number(document.getElementById('angleRange').value);
+  document.getElementById('message').innerText = '';
+  animateShot(angle, ()=>{});
+  const hit = checkHit(angle);
+  if(hit){
+    const perfect = approxEqual(angle, state.current.deg, 0.9);
+    const gained = perfect ? 150 : 100;
+    state.score += gained; state.streak += 1;
+    state.level = Math.min(10, Math.floor(state.score/500)+1);
+    document.getElementById('message').style.color = 'var(--green)';
+    document.getElementById('message').innerText = perfect ? `Perfect! You hit the bullseye: ${state.current.deg}°` : `Hit! The angle was ${state.current.deg}°`;
+  } else {
+    state.score = Math.max(0, state.score-20); state.streak = 0;
+    document.getElementById('message').style.color = '#ff8b8b';
+    document.getElementById('message').innerText = `Missed! Try adjusting the angle.`;
+  }
+  updateHUD();
+}
+
+function showAnswer(){
+  if(!state.current) return;
+  state.score = Math.max(0, state.score - 50); state.streak = 0;
+  document.getElementById('message').style.color = '#ffd580';
+  document.getElementById('message').innerText = `Answer: ${state.current.deg}°`;
+  document.getElementById('hintBox').style.display='block';
+  document.getElementById('hintBox').innerText = `θ = ${state.current.deg}°`;
+  updateHUD();
+}
+
+function updateHUD(){
+  document.getElementById('level').innerText = state.level;
+  document.getElementById('score').innerText = state.score;
+  document.getElementById('streak').innerText = state.streak;
+}
+
+// Wire up UI
+document.getElementById('angleRange').addEventListener('input', (e)=>{
+  const v = Number(e.target.value); document.getElementById('angleValue').innerText = v; renderScene(v);
+});
+
+document.getElementById('shootBtn').addEventListener('click', ()=>{ shoot(); });
+document.getElementById('newProblem').addEventListener('click', ()=>{ newProblem(); });
+document.getElementById('hintBtn').addEventListener('click', ()=>{ showHint(); });
+document.getElementById('showTriangle').addEventListener('click', ()=>{ renderTriangle(true); });
+document.getElementById('giveUp').addEventListener('click', ()=>{ showAnswer(); });
+document.getElementById('resetBtn').addEventListener('click', ()=>{ state.score=0; state.streak=0; state.level=1; updateHUD(); });
+
+// init
+newProblem(); updateHUD();
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Periodic Table Sorter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+        .ui-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .stat-box {
+            background-color: #e5e7eb;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            color: #4b5563;
+        }
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        .category-container {
+            border: 2px dashed #9ca3af;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 150px;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .category-container.drag-over {
+            background-color: #d1fae5;
+            border-color: #34d399;
+        }
+        .element-tile {
+            background-color: #60a5fa;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.25rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, background-color 0.2s, border-color 0.4s;
+            margin: 0.25rem;
+            border: 2px solid transparent; /* Add a transparent border for feedback */
+        }
+        .element-tile:active {
+            cursor: grabbing;
+        }
+        .draggable-elements-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            min-height: 80px;
+        }
+        .category-title {
+            font-weight: bold;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+        }
+        .correct-border { border-color: #22c55e; }
+        .incorrect-border { border-color: #ef4444; }
+        .btn {
+            background-color: #34d399;
+            color: #1f2937;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            border: none;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: #10b981;
+        }
+        .hidden { display: none; }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="game-container">
+        <h1 class="text-3xl font-bold mb-2 text-center text-gray-800">Periodic Table Sorter</h1>
+        <p class="text-center text-gray-600 mb-6">Drag and drop elements into their correct categories.</p>
+
+        <div class="ui-panel">
+            <div class="stat-box">Level: <span id="level">1</span></div>
+            <div class="stat-box">Score: <span id="score">0</span></div>
+            <button class="btn" id="submitBtn">Submit</button>
+            <button class="btn hidden" id="nextLevelBtn">Next Level</button>
+        </div>
+
+        <div id="draggableElements" class="draggable-elements-container">
+            <!-- Elements will be dynamically added here -->
+        </div>
+
+        <div id="puzzleGrid" class="puzzle-grid">
+            <!-- Categories will be dynamically added here -->
+        </div>
+    </div>
+
+    <div id="congratulationsModal" class="modal">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4 text-green-600">Congratulations!</h2>
+            <p class="mb-4 text-gray-700" id="congratsText">You have successfully sorted all the elements!</p>
+            <button id="modalNextLevelBtn" class="btn">Next Level</button>
+        </div>
+    </div>
+    
+    <script>
+        const elementsData = [
+            { symbol: 'H', name: 'Hydrogen', category: 'Nonmetal' },
+            { symbol: 'He', name: 'Helium', category: 'Noble Gas' },
+            { symbol: 'Li', name: 'Lithium', category: 'Alkali Metal' },
+            { symbol: 'C', name: 'Carbon', category: 'Nonmetal' },
+            { symbol: 'O', name: 'Oxygen', category: 'Nonmetal' },
+            { symbol: 'Ne', name: 'Neon', category: 'Noble Gas' },
+            { symbol: 'Na', name: 'Sodium', category: 'Alkali Metal' },
+            { symbol: 'Mg', name: 'Magnesium', category: 'Alkaline Earth Metal' },
+            { symbol: 'Al', name: 'Aluminum', category: 'Other Metal' },
+            { symbol: 'Si', name: 'Silicon', category: 'Metalloid' },
+            { symbol: 'P', name: 'Phosphorus', category: 'Nonmetal' },
+            { symbol: 'S', name: 'Sulfur', category: 'Nonmetal' },
+            { symbol: 'Cl', name: 'Chlorine', category: 'Halogen' },
+            { symbol: 'Ar', name: 'Argon', category: 'Noble Gas' },
+            { symbol: 'K', name: 'Potassium', category: 'Alkali Metal' },
+            { symbol: 'Ca', name: 'Calcium', category: 'Alkaline Earth Metal' },
+            { symbol: 'Fe', name: 'Iron', category: 'Transition Metal' },
+            { symbol: 'Cu', name: 'Copper', category: 'Transition Metal' },
+            { symbol: 'Zn', name: 'Zinc', category: 'Transition Metal' },
+            { symbol: 'Br', name: 'Bromine', category: 'Halogen' },
+            { symbol: 'Ag', name: 'Silver', category: 'Transition Metal' },
+            { symbol: 'Au', name: 'Gold', category: 'Transition Metal' },
+            { symbol: 'I', name: 'Iodine', category: 'Halogen' },
+            { symbol: 'Xe', name: 'Xenon', category: 'Noble Gas' },
+            { symbol: 'Pb', name: 'Lead', category: 'Other Metal' },
+            { symbol: 'U', name: 'Uranium', category: 'Other Metal' },
+        ];
+
+        const game = {
+            level: 1,
+            score: 0,
+            correctCount: 0,
+            currentElements: [],
+            categories: [],
+            maxElementsPerLevel: 10,
+            maxLevels: 3,
+            isSubmitted: false
+        };
+
+        const elementsContainer = document.getElementById('draggableElements');
+        const puzzleGrid = document.getElementById('puzzleGrid');
+        const levelEl = document.getElementById('level');
+        const scoreEl = document.getElementById('score');
+        const submitBtn = document.getElementById('submitBtn');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const congratsModal = document.getElementById('congratulationsModal');
+        const modalNextLevelBtn = document.getElementById('modalNextLevelBtn');
+        const congratsTextEl = document.getElementById('congratsText');
+
+        function setupLevel() {
+            game.correctCount = 0;
+            game.isSubmitted = false;
+            levelEl.textContent = game.level;
+            nextLevelBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            elementsContainer.innerHTML = '';
+            puzzleGrid.innerHTML = '';
+
+            // Get a unique set of elements for the level
+            const elementsForLevel = elementsData.slice(0, Math.min(game.level * game.maxElementsPerLevel, elementsData.length));
+            const shuffledElements = elementsForLevel.sort(() => 0.5 - Math.random());
+            game.currentElements = shuffledElements.slice(0, game.maxElementsPerLevel);
+            
+            // Get unique categories for the current elements
+            const uniqueCategories = [...new Set(game.currentElements.map(el => el.category))].sort();
+            game.categories = uniqueCategories;
+
+            // Render draggable elements
+            game.currentElements.forEach(el => {
+                const elementTile = document.createElement('div');
+                elementTile.textContent = el.symbol;
+                elementTile.dataset.symbol = el.symbol;
+                elementTile.draggable = true;
+                elementTile.classList.add('element-tile', 'hover:bg-blue-600', 'active:bg-blue-700', 'bg-blue-500');
+                elementsContainer.appendChild(elementTile);
+
+                elementTile.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', el.symbol);
+                });
+            });
+
+            // Render drop categories
+            game.categories.forEach(cat => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.classList.add('category-container', 'text-gray-800');
+                categoryDiv.dataset.category = cat;
+                
+                const title = document.createElement('div');
+                title.classList.add('category-title');
+                title.textContent = cat;
+                categoryDiv.appendChild(title);
+
+                puzzleGrid.appendChild(categoryDiv);
+
+                categoryDiv.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (!game.isSubmitted) {
+                        categoryDiv.classList.add('drag-over');
+                    }
+                });
+                categoryDiv.addEventListener('dragleave', (e) => {
+                    categoryDiv.classList.remove('drag-over');
+                });
+                categoryDiv.addEventListener('drop', handleDrop);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (game.isSubmitted) return;
+
+            const categoryContainer = e.currentTarget;
+            categoryContainer.classList.remove('drag-over');
+            
+            const elementSymbol = e.dataTransfer.getData('text/plain');
+            const droppedElement = document.querySelector(`.element-tile[data-symbol="${elementSymbol}"]`);
+
+            if (droppedElement) {
+                // Remove from old container if it was dropped before
+                const oldParent = droppedElement.parentElement;
+                if (oldParent.classList.contains('category-container')) {
+                    oldParent.removeChild(droppedElement);
+                }
+                categoryContainer.appendChild(droppedElement);
+                droppedElement.dataset.droppedCategory = categoryContainer.dataset.category;
+            }
+        }
+        
+        function checkAndSubmit() {
+            game.isSubmitted = true;
+            game.correctCount = 0;
+            submitBtn.classList.add('hidden');
+            
+            const allElements = document.querySelectorAll('#draggableElements .element-tile, .category-container .element-tile');
+            allElements.forEach(tile => {
+                const elementSymbol = tile.dataset.symbol;
+                const droppedCategory = tile.dataset.droppedCategory;
+                const correctElement = elementsData.find(el => el.symbol === elementSymbol);
+                
+                if (correctElement && correctElement.category === droppedCategory) {
+                    game.correctCount++;
+                    game.score += 10;
+                    tile.classList.add('correct-border');
+                    tile.classList.remove('incorrect-border');
+                } else {
+                    game.score = Math.max(0, game.score - 5);
+                    tile.classList.add('incorrect-border');
+                    tile.classList.remove('correct-border');
+                }
+            });
+            
+            scoreEl.textContent = game.score;
+
+            if (game.correctCount === game.currentElements.length) {
+                showModal('Congratulations!', 'You have successfully sorted all the elements! Get ready for the next challenge.', 'Next Level');
+                nextLevelBtn.classList.remove('hidden');
+            } else {
+                showModal('Keep Trying!', `You got ${game.correctCount} out of ${game.currentElements.length} correct. Try again!`, 'Try Again');
+                submitBtn.classList.remove('hidden');
+            }
+        }
+        
+        function showModal(title, text, buttonText) {
+            congratsModal.querySelector('h2').textContent = title;
+            congratsTextEl.textContent = text;
+            modalNextLevelBtn.textContent = buttonText;
+            congratsModal.style.display = 'flex';
+        }
+
+        submitBtn.addEventListener('click', checkAndSubmit);
+        nextLevelBtn.addEventListener('click', () => {
+             congratsModal.style.display = 'none';
+             game.level++;
+             if (game.level > game.maxLevels) {
+                showModal('Game Over!', `You completed all levels with a final score of ${game.score}!`, 'Play Again');
+                game.level = 1;
+                game.score = 0;
+            } else {
+                setupLevel();
+            }
+        });
+        modalNextLevelBtn.addEventListener('click', () => {
+             congratsModal.style.display = 'none';
+             if (modalNextLevelBtn.textContent === 'Play Again') {
+                game.score = 0;
+                setupLevel();
+             } else if (modalNextLevelBtn.textContent === 'Next Level') {
+                game.level++;
+                if (game.level > game.maxLevels) {
+                    showModal('Game Over!', `You completed all levels with a final score of ${game.score}!`, 'Play Again');
+                    game.level = 1;
+                    game.score = 0;
+                } else {
+                    setupLevel();
+                }
+             } else {
+                // If the user got it wrong, they can try again with the same level
+                setupLevel();
+             }
+        });
+
+        // Initial setup
+        window.onload = function() {
+            setupLevel();
+        };
+
+    </script>
+</body>
+</html>

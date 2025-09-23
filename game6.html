@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Word Match Challenge</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(to right, #ffecd2, #fcb69f);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #333;
+    }
+
+    h1 {
+      background: linear-gradient(to right, #ff6a00, #ee0979);
+      color: white;
+      padding: 20px;
+      margin: 0;
+      font-size: 2.5em;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .game-container {
+      margin: 30px auto;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    }
+
+    .word, .definition {
+      display: inline-block;
+      background: #f9c74f;
+      padding: 10px 20px;
+      margin: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .word:hover, .definition:hover {
+      transform: scale(1.1);
+      background: #90be6d;
+    }
+
+    .matched {
+      background: #43aa8b !important;
+      color: white;
+      pointer-events: none;
+    }
+
+    #score {
+      font-size: 1.5em;
+      margin-top: 20px;
+    }
+
+    #reset {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1em;
+      background: #577590;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #reset:hover {
+      background: #277da1;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎉 Word Match Challenge 🎉</h1>
+  <div class="game-container">
+    <div id="words"></div>
+    <div id="definitions"></div>
+    <div id="score">Score: 0</div>
+    <button id="reset">Play Again</button>
+  </div>
+
+  <script>
+    const wordList = [
+      { word: "Eloquent", definition: "Fluent or persuasive in speaking or writing" },
+      { word: "Ambiguous", definition: "Open to more than one interpretation" },
+      { word: "Metaphor", definition: "A figure of speech comparing two things without using 'like' or 'as'" },
+      { word: "Hyperbole", definition: "Exaggerated statements not meant to be taken literally" },
+      { word: "Oxymoron", definition: "A combination of contradictory words" }
+    ];
+
+    let score = 0;
+    let selectedWord = null;
+
+    const wordsDiv = document.getElementById("words");
+    const defsDiv = document.getElementById("definitions");
+    const scoreDiv = document.getElementById("score");
+    const resetBtn = document.getElementById("reset");
+
+    function shuffle(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    function loadGame() {
+      score = 0;
+      selectedWord = null;
+      scoreDiv.textContent = "Score: 0";
+      wordsDiv.innerHTML = "";
+      defsDiv.innerHTML = "";
+
+      const shuffledWords = shuffle([...wordList]);
+      const shuffledDefs = shuffle([...wordList]);
+
+      shuffledWords.forEach(item => {
+        const wordEl = document.createElement("div");
+        wordEl.className = "word";
+        wordEl.textContent = item.word;
+        wordEl.onclick = () => selectWord(item.word, wordEl);
+        wordsDiv.appendChild(wordEl);
+      });
+
+      shuffledDefs.forEach(item => {
+        const defEl = document.createElement("div");
+        defEl.className = "definition";
+        defEl.textContent = item.definition;
+        defEl.onclick = () => matchDefinition(item.word, defEl);
+        defsDiv.appendChild(defEl);
+      });
+    }
+
+    function selectWord(word, element) {
+      selectedWord = word;
+      document.querySelectorAll(".word").forEach(el => el.classList.remove("selected"));
+      element.classList.add("selected");
+    }
+
+    function matchDefinition(word, defElement) {
+      if (selectedWord === word) {
+        defElement.classList.add("matched");
+        document.querySelector(`.word.selected`).classList.add("matched");
+        score++;
+        scoreDiv.textContent = `Score: ${score}`;
+        selectedWord = null;
+      } else {
+        alert("Oops! Try again.");
+      }
+    }
+
+    resetBtn.onclick = loadGame;
+
+    loadGame();
+  </script>
+</body>
+</html>

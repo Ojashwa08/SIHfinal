@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Average Score</title>
+  <link rel="stylesheet" href="style1.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Average Score – Quiz Results</h1>
+  <p>The average class performance is shown below.</p>
+
+  <canvas id="avgChart" width="400" height="200"></canvas>
+
+  <a href="teacher.html" class="back-btn">Back to Dashboard</a>
+
+  <script>
+    new Chart(document.getElementById("avgChart"), {
+      type: 'line',
+      data: {
+        labels: ["Quiz 1", "Quiz 2", "Quiz 3", "Quiz 4", "Quiz 5"],
+        datasets: [{
+          label: "Average % Score",
+          data: [60, 65, 68, 70, 72],
+          borderColor: "blue",
+          backgroundColor: "rgba(0,123,255,0.2)",
+          fill: true
+        }]
+      }
+    });
+  </script>
+</body>
+</html>

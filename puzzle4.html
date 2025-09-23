@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Disease Diagnosis Puzzle</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f9ff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #2c3e50;
+    }
+    .patient {
+      background: #fff3cd;
+      border: 2px solid #f1c40f;
+      border-radius: 12px;
+      padding: 20px;
+      width: 60%;
+      margin: 15px auto;
+      font-size: 18px;
+    }
+    .options {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px;
+      flex-wrap: wrap;
+    }
+    .option {
+      background: #d6eaf8;
+      border: 2px solid #3498db;
+      border-radius: 8px;
+      padding: 12px 20px;
+      cursor: grab;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+    .option:hover {
+      background: #aed6f1;
+    }
+    .droppable {
+      border: 2px dashed #7f8c8d;
+      border-radius: 10px;
+      padding: 25px;
+      margin: 20px auto;
+      width: 60%;
+      background: #fdfefe;
+      font-size: 18px;
+    }
+    #score {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #nextBtn {
+      background: #2980b9;
+      color: white;
+      display: none;
+    }
+    #nextBtn:hover {
+      background: #21618c;
+    }
+    #restartBtn {
+      background: #27ae60;
+      color: white;
+      display: none;
+    }
+    #restartBtn:hover {
+      background: #229954;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧩 Disease Diagnosis Puzzle</h1>
+  <p>Drag the correct cause onto the patient!</p>
+
+  <div id="game">
+    <div class="patient" id="patient"></div>
+    <div class="options" id="options"></div>
+    <div class="droppable" id="dropzone">Drop here</div>
+  </div>
+
+  <div id="score">Score: 0</div>
+  <button id="nextBtn">Next Patient ➡️</button>
+  <button id="restartBtn">🔄 Restart</button>
+
+  <script>
+    const diseases = [
+      {symptom: "Fever, runny nose, sneezing", answer: "Virus 🦠"},
+      {symptom: "Sore throat, pus in tonsils", answer: "Bacteria 🧫"},
+      {symptom: "Itchy scalp with red patches", answer: "Fungus 🍄"},
+      {symptom: "High fever, chills, mosquito bite history", answer: "Parasite 🪱"},
+      {symptom: "Weak immunity, HIV positive", answer: "Virus 🦠"},
+      {symptom: "Painful urination, urinary tract infection", answer: "Bacteria 🧫"},
+      {symptom: "Ring-shaped rash on skin", answer: "Fungus 🍄"},
+      {symptom: "Dysentery after drinking dirty water", answer: "Parasite 🪱"},
+      {symptom: "Sudden outbreak of flu in school", answer: "Virus 🦠"},
+      {symptom: "Food poisoning after eating stale food", answer: "Bacteria 🧫"}
+    ];
+
+    const optionsList = ["Virus 🦠", "Bacteria 🧫", "Parasite 🪱", "Fungus 🍄", "Lifestyle 🏃"];
+
+    let current = 0;
+    let score = 0;
+    let locked = false;
+
+    const patientDiv = document.getElementById("patient");
+    const optionsDiv = document.getElementById("options");
+    const dropzone = document.getElementById("dropzone");
+    const scoreDiv = document.getElementById("score");
+    const nextBtn = document.getElementById("nextBtn");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function loadQuestion() {
+      locked = false;
+      patientDiv.textContent = `Patient ${current + 1} of ${diseases.length} - Symptoms: ${diseases[current].symptom}`;
+      optionsDiv.innerHTML = "";
+      dropzone.textContent = "Drop here";
+      nextBtn.style.display = "none";
+
+      optionsList.forEach(opt => {
+        const div = document.createElement("div");
+        div.className = "option";
+        div.textContent = opt;
+        div.draggable = true;
+        div.addEventListener("dragstart", dragStart);
+        optionsDiv.appendChild(div);
+      });
+    }
+
+    function dragStart(e) {
+      if (!locked) {
+        e.dataTransfer.setData("text", e.target.textContent);
+      }
+    }
+
+    dropzone.addEventListener("dragover", e => e.preventDefault());
+
+    dropzone.addEventListener("drop", e => {
+      e.preventDefault();
+      if (locked) return;
+
+      const data = e.dataTransfer.getData("text");
+      if (data === diseases[current].answer) {
+        dropzone.textContent = "✅ Correct! " + data;
+        score += 10;
+        locked = true;
+      } else {
+        dropzone.textContent = "❌ Wrong! It was " + diseases[current].answer;
+      }
+
+      scoreDiv.textContent = "Score: " + score;
+      nextBtn.style.display = "inline-block";
+    });
+
+    nextBtn.addEventListener("click", () => {
+      current++;
+      if (current < diseases.length) {
+        loadQuestion();
+      } else {
+        endGame();
+      }
+    });
+
+    function endGame() {
+      patientDiv.textContent = "🎉 All patients treated!";
+      optionsDiv.innerHTML = "";
+      dropzone.textContent = "Game Over";
+      scoreDiv.textContent = `Final Score: ${score} / ${diseases.length * 10}`;
+      nextBtn.style.display = "none";
+      restartBtn.style.display = "inline-block";
+    }
+
+    restartBtn.addEventListener("click", () => {
+      current = 0;
+      score = 0;
+      scoreDiv.textContent = "Score: 0";
+      restartBtn.style.display = "none";
+      loadQuestion();
+    });
+
+    loadQuestion();
+  </script>
+</body>
+</html>

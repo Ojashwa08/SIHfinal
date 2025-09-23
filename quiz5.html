@@ -1,0 +1,176 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>512MI: Historical Figures Edition</title>
+<style>
+  body
+   { font-family: Arial, sans-serif; 
+    background:#f0f8ff; 
+    margin:0;
+     padding:0;
+    }
+
+  .app {
+     max-width:700px;
+      margin:20px auto;
+       padding:16px;
+     }
+
+  h1 { 
+    text-align:center; 
+    color:#2b6cb0; 
+}
+
+.card {
+     background:#fff; 
+     border-radius:10px;
+      padding:16px;
+       margin-bottom:16px; 
+       box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    }
+
+  .question {
+     font-size:18px;
+      margin-bottom:12px;
+    
+    }
+
+
+  .options div {
+     padding:10px;
+      margin-bottom:8px; 
+      border-radius:8px;
+       border:1px solid #ccc; 
+       cursor:pointer;
+     }
+
+  .options div.correct { 
+    border-color:#16a34a;
+     background:#dcfce7;
+     }
+
+  .options div.wrong {
+     border-color:#ef4444; 
+     background:#fee2e2;
+    
+    }
+
+
+  button {
+     padding:8px 12px;
+      border-radius:8px; 
+      border:none;
+       background:#2b6cb0; 
+       color:#fff; 
+       cursor:pointer;
+        margin-top:10px;
+         }
+
+         
+</style>
+</head>
+<body>
+<div class="app">
+  <h1>Historical Figures Edition</h1>
+  <div class="card">
+    <div>Score: <span id="score">0</span> | Lives: <span id="lives">3</span></div>
+    <div>Round: <span id="roundNum">1</span> | Question: <span id="qNum">1</span></div>
+  </div>
+
+  <div id="gameArea" class="card">
+    <div class="question" id="questionText"></div>
+    <div class="options" id="optionsArea"></div>
+    <button id="nextBtn" style="display:none;">Next Question</button>
+  </div>
+
+  <div class="card" id="resultArea" style="display:none;"></div>
+</div>
+
+<script>
+// Game Data
+const ROUNDS = [
+  {name:"Freedom Movements", questions:[
+    {q:"Who led the Chauri Chaura incident?", opts:["Mahatma Gandhi","Bhagat Singh","Local Protesters"], a:2},
+    {q:"In which year did India gain independence?", opts:["1947","1950","1930"], a:0},
+    {q:"Who started the Salt March?", opts:["Jawaharlal Nehru","Mahatma Gandhi","Subhash Chandra Bose"], a:1}
+  ]},
+  {name:"National Leaders", questions:[
+    {q:"Who is known as the 'Iron Man of India'?", opts:["Jawaharlal Nehru","Sardar Vallabhbhai Patel","Bal Gangadhar Tilak"], a:1},
+    {q:"First Prime Minister of India?", opts:["Mahatma Gandhi","Jawaharlal Nehru","Rajendra Prasad"], a:1},
+    {q:"Who was the first President of India?", opts:["Rajendra Prasad","Abdul Kalam","Sardar Patel"], a:0}
+  ]},
+  {name:"Important Dates", questions:[
+    {q:"When is Republic Day celebrated?", opts:["26 Jan","15 Aug","2 Oct"], a:0},
+    {q:"Independence Day?", opts:["26 Jan","15 Aug","2 Oct"], a:1},
+    {q:"Gandhi Jayanti?", opts:["26 Jan","15 Aug","2 Oct"], a:2}
+  ]}
+];
+
+// App State
+let state = {score:0, lives:3, roundIdx:0, qIdx:0};
+
+// DOM
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const roundEl = document.getElementById('roundNum');
+const qEl = document.getElementById('qNum');
+const questionText = document.getElementById('questionText');
+const optionsArea = document.getElementById('optionsArea');
+const nextBtn = document.getElementById('nextBtn');
+const resultArea = document.getElementById('resultArea');
+
+// Functions
+function loadQuestion() {
+  optionsArea.innerHTML='';
+  nextBtn.style.display='none';
+  const round = ROUNDS[state.roundIdx];
+  const question = round.questions[state.qIdx];
+  roundEl.textContent=state.roundIdx+1;
+  qEl.textContent=state.qIdx+1;
+  questionText.textContent = question.q;
+  question.opts.forEach((opt,i)=>{
+    const div = document.createElement('div'); div.textContent=opt;
+    div.onclick=()=> i===question.a?handleCorrect():handleWrong();
+    optionsArea.appendChild(div);
+  });
+}
+
+function handleCorrect(){
+  state.score+=10; scoreEl.textContent=state.score;
+  nextBtn.style.display='inline-block';
+}
+
+function handleWrong(){
+  state.lives-=1; livesEl.textContent=state.lives;
+  if(state.lives<=0){ endGame(); return; }
+  nextBtn.style.display='inline-block';
+}
+
+function nextQuestion(){
+  state.qIdx++;
+  const round = ROUNDS[state.roundIdx];
+  if(state.qIdx>=round.questions.length){
+    state.roundIdx++;
+    state.qIdx=0;
+    if(state.roundIdx>=ROUNDS.length){ endGame(); return; }
+  }
+  loadQuestion();
+}
+
+function endGame(){
+  questionText.style.display='none';
+  optionsArea.style.display='none';
+  nextBtn.style.display='none';
+  resultArea.style.display='block';
+  resultArea.innerHTML='<h2>Game Over!</h2><p>Total Score: {score}</p>';
+}
+
+// Event
+nextBtn.onclick=nextQuestion;
+
+// Start
+loadQuestion();
+</script>
+</body>
+</html>

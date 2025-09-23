@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Puzzle</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.05);
+            padding: 2rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            color: #1f2937;
+        }
+
+        p {
+            text-align: center;
+            color: #4b5563;
+            margin-bottom: 1.5rem;
+        }
+
+        .ui-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background-color: #e5e7eb;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            color: #4b5563;
+        }
+
+        .puzzle-grid {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+
+        .sentence-container {
+            border: 2px dashed #9ca3af;
+            border-radius: 1rem;
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            min-height: 100px;
+            width: 100%;
+            max-width: 800px;
+            transition: background-color 0.3s, border-color 0.3s;
+            gap: 0.5rem;
+        }
+
+        .sentence-container.drag-over {
+            background-color: #d1fae5;
+            border-color: #34d399;
+        }
+
+        .word-tile {
+            background-color: #60a5fa;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 0.5rem;
+            cursor: grab;
+            user-select: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s, background-color 0.2s, border-color 0.4s;
+            border: 2px solid transparent;
+        }
+
+        .word-tile:active {
+            cursor: grabbing;
+        }
+
+        .draggable-words-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 1rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            border: 1px solid #e5e7eb;
+            min-height: 80px;
+            margin-top: 1rem;
+        }
+
+        .correct-border { border-color: #22c55e; }
+        .incorrect-border { border-color: #ef4444; }
+
+        .btn {
+            background-color: #34d399;
+            color: #1f2937;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: #10b981;
+        }
+
+        .hidden { display: none; }
+
+        .modal {
+            position: fixed;
+            top:0;
+            left:0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.2);
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .modal-content h2 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Grammar Puzzle</h1>
+        <p>Drag and drop the words to form a correct sentence.</p>
+
+        <div class="ui-panel">
+            <div class="stat-box">Level: <span id="level">1</span></div>
+            <div class="stat-box">Score: <span id="score">0</span></div>
+            <button class="btn" id="submitBtn">Submit</button>
+            <button class="btn hidden" id="nextLevelBtn">Next Level</button>
+        </div>
+
+        <div class="puzzle-grid">
+            <div id="sentenceContainer" class="sentence-container"></div>
+            <div id="draggableWords" class="draggable-words-container"></div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Congratulations!</h2>
+            <p id="modalText">You have successfully unscrambled the sentence!</p>
+            <button id="modalBtn" class="btn">Next Level</button>
+        </div>
+    </div>
+    
+    <script>
+        const sentencesData = [
+            { correctSentence: "The quick brown fox jumps over the lazy dog." },
+            { correctSentence: "She went to the store to buy some apples." },
+            { correctSentence: "He is learning to play the guitar on weekends." },
+            { correctSentence: "The sun shines brightly in the summer sky." },
+            { correctSentence: "I have always wanted to travel to Japan." },
+            { correctSentence: "A strong wind blew the leaves from the trees." },
+        ];
+
+        const game = {
+            level: 1,
+            score: 0,
+            correctWords: [],
+            isSubmitted: false
+        };
+
+        const draggableWordsContainer = document.getElementById('draggableWords');
+        const sentenceContainer = document.getElementById('sentenceContainer');
+        const levelEl = document.getElementById('level');
+        const scoreEl = document.getElementById('score');
+        const submitBtn = document.getElementById('submitBtn');
+        const nextLevelBtn = document.getElementById('nextLevelBtn');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalText = document.getElementById('modalText');
+        const modalBtn = document.getElementById('modalBtn');
+
+        function setupLevel() {
+            game.isSubmitted = false;
+            levelEl.textContent = game.level;
+            nextLevelBtn.classList.add('hidden');
+            submitBtn.classList.remove('hidden');
+            draggableWordsContainer.innerHTML = '';
+            sentenceContainer.innerHTML = '';
+            
+            if (game.level > sentencesData.length) {
+                showModal('Game Over!', `You completed all puzzles with a final score of ${game.score}!`, 'Play Again');
+                game.level = 1;
+                game.score = 0;
+                return;
+            }
+
+            const currentSentence = sentencesData[game.level - 1].correctSentence;
+            game.correctWords = currentSentence.split(' ');
+            
+            const scrambledWords = [...game.correctWords].sort(() => 0.5 - Math.random());
+
+            scrambledWords.forEach(word => {
+                const wordTile = document.createElement('div');
+                wordTile.textContent = word;
+                wordTile.dataset.word = word;
+                wordTile.draggable = true;
+                wordTile.classList.add('word-tile', 'hover:bg-blue-600', 'active:bg-blue-700', 'bg-blue-500');
+                draggableWordsContainer.appendChild(wordTile);
+
+                wordTile.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', word);
+                });
+            });
+
+            sentenceContainer.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                if (!game.isSubmitted) {
+                    sentenceContainer.classList.add('drag-over');
+                }
+            });
+            sentenceContainer.addEventListener('dragleave', (e) => {
+                sentenceContainer.classList.remove('drag-over');
+            });
+            sentenceContainer.addEventListener('drop', handleDrop);
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            if (game.isSubmitted) return;
+
+            sentenceContainer.classList.remove('drag-over');
+            
+            const word = e.dataTransfer.getData('text/plain');
+            const droppedWord = document.querySelector(`.word-tile[data-word="${word}"]`);
+
+            if (droppedWord) {
+                // Remove from old container if it was dropped before
+                const oldParent = droppedWord.parentElement;
+                if (oldParent.classList.contains('sentence-container')) {
+                    oldParent.removeChild(droppedWord);
+                }
+                sentenceContainer.appendChild(droppedWord);
+            }
+        }
+        
+        function checkAndSubmit() {
+            game.isSubmitted = true;
+            submitBtn.classList.add('hidden');
+            
+            const placedWords = Array.from(sentenceContainer.children).map(tile => tile.textContent);
+            const userSentence = placedWords.join(' ');
+            const correctSentence = game.correctWords.join(' ');
+            
+            let isCorrect = userSentence === correctSentence;
+            
+            if (isCorrect) {
+                game.score += 10;
+                showModal('Congratulations!', 'You successfully formed the correct sentence!', 'Next Level');
+                nextLevelBtn.classList.remove('hidden');
+            } else {
+                game.score = Math.max(0, game.score - 5);
+                showModal('Keep Trying!', 'That sentence isn\'t quite right. Try again!', 'Try Again');
+                submitBtn.classList.remove('hidden');
+            }
+
+            scoreEl.textContent = game.score;
+
+            Array.from(sentenceContainer.children).forEach((tile, index) => {
+                if (tile.textContent === game.correctWords[index]) {
+                    tile.classList.add('correct-border');
+                    tile.classList.remove('incorrect-border');
+                } else {
+                    tile.classList.add('incorrect-border');
+                    tile.classList.remove('correct-border');
+                }
+            });
+        }
+        
+        function showModal(title, text, buttonText) {
+            modalTitle.textContent = title;
+            modalText.textContent = text;
+            modalBtn.textContent = buttonText;
+            modal.style.display = 'flex';
+        }
+
+        submitBtn.addEventListener('click', checkAndSubmit);
+        
+        modalBtn.addEventListener('click', () => {
+             modal.style.display = 'none';
+             if (modalBtn.textContent === 'Play Again') {
+                game.score = 0;
+                game.level = 1;
+                setupLevel();
+             } else if (modalBtn.textContent === 'Next Level') {
+                game.level++;
+                setupLevel();
+             } else {
+                setupLevel();
+             }
+        });
+
+        
+        window.onload = function() {
+            setupLevel();
+        };
+
+    </script>
+</body>
+</html>

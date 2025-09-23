@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pass Percentage</title>
+  <link rel="stylesheet" href="style1.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Pass Percentage</h1>
+  <p>Overall class pass/fail ratio.</p>
+
+  <canvas id="pieChart" width="400" height="200"></canvas>
+
+  <a href="teacher.html" class="back-btn">Back to Dashboard</a>
+
+  <script>
+    new Chart(document.getElementById("pieChart"), {
+      type: 'pie',
+      data: {
+        labels: ["Pass", "Fail"],
+        datasets: [{
+          data: [22, 8],
+          backgroundColor: ["#28a745", "#dc3545"]
+        }]
+      }
+    });
+  </script>
+</body>
+</html>

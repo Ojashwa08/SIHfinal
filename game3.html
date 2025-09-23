@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemical Reaction Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a2e;
+        }
+        .vial-liquid {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .vial-shadow {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease-in-out;
+            cursor: grab;
+            touch-action: none;
+        }
+        .vial-shadow:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4 bg-gray-900 text-white">
+
+    <div class="game-container w-full max-w-4xl p-8 bg-gray-800 rounded-2xl shadow-xl border border-gray-700">
+        <h1 class="text-4xl md:text-5xl font-bold text-center mb-6 text-indigo-400">Chemical Mixer</h1>
+        <p class="text-center mb-10 text-lg text-gray-400">Drag and drop two chemicals into the beaker to create a new solution!</p>
+
+        <div class="flex flex-col lg:flex-row items-center justify-center lg:items-start lg:justify-between gap-12">
+            
+            <div class="w-full lg:w-1/3">
+                <h2 class="text-2xl font-semibold mb-4 text-center text-gray-300">Chemicals</h2>
+                <div id="chemical-selection" class="flex flex-wrap justify-center gap-6 p-4 bg-gray-700 rounded-lg">
+                </div>
+            </div>
+
+            <div class="w-full lg:w-1/3 flex flex-col items-center">
+                <h2 class="text-2xl font-semibold mb-4 text-center text-gray-300">Mixing Beaker</h2>
+                <div id="mixing-beaker" class="w-40 h-52 bg-gray-700 border-2 border-dashed border-gray-500 rounded-b-full overflow-hidden flex flex-col-reverse relative shadow-inner-xl p-1">
+                </div>
+                
+                <div class="flex items-center justify-center gap-4 mt-6 w-full">
+                    <button id="mix-button" class="bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+                        Mix
+                    </button>
+                    <button id="reset-button" class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-200">
+                        Reset
+                    </button>
+                </div>
+
+                <div id="status-message" class="mt-6 text-center text-lg font-medium min-h-[2rem]"></div>
+                
+                <div id="reaction-details" class="mt-6 w-full bg-gray-700 p-4 rounded-lg shadow-inner-xl text-left text-sm hidden">
+                    <h3 class="font-bold text-lg mb-2 text-indigo-300">Reaction Details</h3>
+                    <p id="details-text"></p>
+                </div>
+            </div>
+            
+            <div class="w-full lg:w-1/3">
+                <h2 class="text-2xl font-semibold mb-4 text-center text-gray-300">Discovered</h2>
+                <div id="discovered-compounds-container" class="bg-gray-700 p-4 rounded-lg min-h-[10rem] flex flex-col items-center">
+                    <ul id="discovered-compounds" class="text-center list-none p-0 w-full">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        console.log("Chemical Mixer script is loading...");
+
+        const CHEMICALS = [
+            { name: "Sulphuric Acid", color: "#3498db", id: "acid" },
+            { name: "Sodium Hydroxide", color: "#e74c3c", id: "base" },
+            { name: "Ethanol", color: "#2ecc71", id: "alcohol" },
+            { name: "Ammonia", color: "#f1c40f", id: "ammonia" },
+            { name: "Potassium Permanganate", color: "#9b59b6", id: "permanganate" },
+            { name: "Iron Chloride", color: "#e67e22", id: "iron" }
+        ];
+
+        const REACTIONS = [
+            {
+                reactants: ["acid", "base"],
+                product: {
+                    name: "Sodium Sulphate",
+                    color: "#f39c12",
+                    info: "A strong acid-base reaction (neutralization) forming a salt and water. The solution becomes neutral."
+                }
+            },
+            {
+                reactants: ["iron", "base"],
+                product: {
+                    name: "Iron Hydroxide",
+                    color: "#27ae60",
+                    info: "A precipitation reaction. The mixing of two solutions forms an insoluble solid (precipitate)."
+                }
+            },
+            {
+                reactants: ["acid", "permanganate"],
+                product: {
+                    name: "Manganese Sulphate",
+                    color: "#7f8c8d",
+                    info: "An oxidation-reduction reaction where the powerful oxidizing agent, potassium permanganate, is reduced."
+                }
+            }
+        ];
+
+        const chemicalSelection = document.getElementById('chemical-selection');
+        const mixingBeaker = document.getElementById('mixing-beaker');
+        const mixButton = document.getElementById('mix-button');
+        const resetButton = document.getElementById('reset-button');
+        const statusMessage = document.getElementById('status-message');
+        const discoveredCompounds = document.getElementById('discovered-compounds');
+        const reactionDetailsContainer = document.getElementById('reaction-details');
+        const detailsText = document.getElementById('details-text');
+
+        let chemicalsInBeaker = [];
+
+        function renderChemicals() {
+            chemicalSelection.innerHTML = '';
+            CHEMICALS.forEach(chemical => {
+                const vial = document.createElement('div');
+                vial.className = 'w-20 h-28 relative rounded-b-3xl bg-gray-600 vial-shadow';
+                vial.draggable = true;
+                vial.dataset.chemicalId = chemical.id;
+                vial.dataset.chemicalName = chemical.name;
+                vial.dataset.chemicalColor = chemical.color;
+
+                const liquid = document.createElement('div');
+                liquid.className = 'w-full h-full rounded-b-3xl vial-liquid';
+                liquid.style.backgroundColor = chemical.color;
+
+                const nameTag = document.createElement('span');
+                nameTag.textContent = chemical.name;
+                nameTag.className = 'absolute top-1 left-1/2 -translate-x-1/2 text-xs font-bold text-white text-center w-full p-1';
+
+                vial.appendChild(liquid);
+                vial.appendChild(nameTag);
+                chemicalSelection.appendChild(vial);
+            });
+        }
+        
+        function updateBeakerVisuals() {
+            mixingBeaker.innerHTML = '';
+            if (chemicalsInBeaker.length > 0) {
+                const layerHeight = 100 / chemicalsInBeaker.length;
+                chemicalsInBeaker.forEach(chem => {
+                    const liquidLayer = document.createElement('div');
+                    liquidLayer.className = 'w-full transition-all duration-500 ease-in-out';
+                    liquidLayer.style.height = `${layerHeight}%`;
+                    liquidLayer.style.backgroundColor = chem.color;
+                    mixingBeaker.appendChild(liquidLayer);
+                });
+            }
+        }
+        
+        function mixColors(color1, color2) {
+            const c1 = parseInt(color1.substring(1), 16);
+            const c2 = parseInt(color2.substring(1), 16);
+            const r1 = (c1 >> 16) & 0xFF;
+            const g1 = (c1 >> 8) & 0xFF;
+            const b1 = c1 & 0xFF;
+            const r2 = (c2 >> 16) & 0xFF;
+            const g2 = (c2 >> 8) & 0xFF;
+            const b2 = c2 & 0xFF;
+            const r = Math.floor((r1 + r2) / 2);
+            const g = Math.floor((g1 + g2) / 2);
+            const b = Math.floor((b1 + b2) / 2);
+            return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        chemicalSelection.addEventListener('dragstart', (e) => {
+            const vial = e.target.closest('.vial-shadow');
+            if (vial) {
+                e.dataTransfer.setData('chemical/id', vial.dataset.chemicalId);
+                e.dataTransfer.setData('chemical/name', vial.dataset.chemicalName);
+                e.dataTransfer.setData('chemical/color', vial.dataset.chemicalColor);
+                vial.classList.add('opacity-50');
+            }
+        });
+
+        chemicalSelection.addEventListener('dragend', (e) => {
+            const vial = e.target.closest('.vial-shadow');
+            if (vial) {
+                vial.classList.remove('opacity-50');
+            }
+        });
+
+        mixingBeaker.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            mixingBeaker.classList.add('border-indigo-400');
+        });
+        
+        mixingBeaker.addEventListener('dragleave', () => {
+            mixingBeaker.classList.remove('border-indigo-400');
+        });
+
+        mixingBeaker.addEventListener('drop', (e) => {
+            e.preventDefault();
+            mixingBeaker.classList.remove('border-indigo-400');
+            const id = e.dataTransfer.getData('chemical/id');
+            const name = e.dataTransfer.getData('chemical/name');
+            const color = e.dataTransfer.getData('chemical/color');
+
+            if (id && chemicalsInBeaker.length < 2 && !chemicalsInBeaker.some(c => c.id === id)) {
+                chemicalsInBeaker.push({ id, name, color });
+                updateBeakerVisuals();
+                statusMessage.textContent = `${chemicalsInBeaker.length} chemical(s) added.`;
+            }
+        });
+        
+        let currentTouchVial = null;
+
+        chemicalSelection.addEventListener('touchstart', (e) => {
+            const vial = e.target.closest('.vial-shadow');
+            if (vial) {
+                e.preventDefault();
+                currentTouchVial = vial;
+                
+                vial.style.position = 'absolute';
+                vial.style.zIndex = '1000';
+                vial.style.opacity = '0.7';
+                
+                const touch = e.touches[0];
+                vial.style.left = `${touch.clientX - vial.offsetWidth / 2}px`;
+                vial.style.top = `${touch.clientY - vial.offsetHeight / 2}px`;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (currentTouchVial) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                currentTouchVial.style.left = `${touch.clientX - currentTouchVial.offsetWidth / 2}px`;
+                currentTouchVial.style.top = `${touch.clientY - currentTouchVial.offsetHeight / 2}px`;
+            }
+        }, { passive: false });
+
+        document.addEventListener('touchend', (e) => {
+            if (currentTouchVial) {
+                const beakerRect = mixingBeaker.getBoundingClientRect();
+                const touch = e.changedTouches[0];
+                
+                if (
+                    touch.clientX > beakerRect.left && touch.clientX < beakerRect.right &&
+                    touch.clientY > beakerRect.top && touch.clientY < beakerRect.bottom
+                ) {
+                    const id = currentTouchVial.dataset.chemicalId;
+                    const name = currentTouchVial.dataset.chemicalName;
+                    const color = currentTouchVial.dataset.chemicalColor;
+
+                    if (chemicalsInBeaker.length < 2 && !chemicalsInBeaker.some(c => c.id === id)) {
+                        chemicalsInBeaker.push({ id, name, color });
+                        updateBeakerVisuals();
+                        statusMessage.textContent = `${chemicalsInBeaker.length} chemical(s) added.`;
+                    }
+                }
+                
+                currentTouchVial.style.position = '';
+                currentTouchVial.style.zIndex = '';
+                currentTouchVial.style.opacity = '';
+                currentTouchVial.style.left = '';
+                currentTouchVial.style.top = '';
+                currentTouchVial = null;
+            }
+        });
+
+        mixButton.addEventListener('click', () => {
+            if (chemicalsInBeaker.length === 2) {
+                const [chem1, chem2] = chemicalsInBeaker;
+                const sortedIds = [chem1.id, chem2.id].sort();
+                let product = null;
+
+                const foundReaction = REACTIONS.find(r => r.reactants.sort().toString() === sortedIds.toString());
+                
+                if (foundReaction) {
+                    product = foundReaction.product;
+                } else {
+                    const newColor = mixColors(chem1.color, chem2.color);
+                    const newName = `Solution of ${chem1.name} and ${chem2.name}`;
+                    product = {
+                        name: newName,
+                        color: newColor,
+                        info: `A new solution formed by combining ${chem1.name} and ${chem2.name}.`
+                    };
+                }
+
+                mixingBeaker.innerHTML = '';
+                const resultLiquid = document.createElement('div');
+                resultLiquid.className = 'w-full h-full vial-liquid';
+                resultLiquid.style.backgroundColor = product.color;
+                mixingBeaker.appendChild(resultLiquid);
+
+                statusMessage.textContent = `${product.name} was created!`;
+                
+                detailsText.innerHTML = `
+                    <p><strong>Reactants:</strong> ${chem1.name} + ${chem2.name}</p>
+                    <p><strong>Product:</strong> ${product.name}</p>
+                    <p><strong>Process:</strong> ${product.info}</p>
+                `;
+                reactionDetailsContainer.classList.remove('hidden');
+
+                const listItem = document.createElement('li');
+                listItem.textContent = product.name;
+                listItem.className = 'bg-gray-600 p-2 rounded-lg my-2 w-full text-sm font-semibold';
+                discoveredCompounds.appendChild(listItem);
+                
+                chemicalsInBeaker = [];
+            } else {
+                statusMessage.textContent = "Please add exactly two chemicals to mix!";
+            }
+        });
+
+        resetButton.addEventListener('click', () => {
+            chemicalsInBeaker = [];
+            updateBeakerVisuals();
+            statusMessage.textContent = "Beaker has been reset.";
+            reactionDetailsContainer.classList.add('hidden');
+            detailsText.textContent = '';
+        });
+        
+        window.onload = () => {
+            renderChemicals();
+            console.log("Chemical Mixer has been successfully initialized and rendered.");
+        };
+
+    </script>
+</body>
+</html>

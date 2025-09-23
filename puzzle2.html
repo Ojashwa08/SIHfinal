@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optics Puzzle Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #e0f7fa;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    #gameContainer {
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        width: 800px;
+        max-width: 95%;
+        text-align: center;
+    }
+    h1 {
+        color: #00796b;
+        margin-bottom: 5px;
+    }
+    #level {
+        color: #00796b;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    canvas {
+        border: 2px solid #0097a7;
+        margin-bottom: 10px;
+        background: #e0f2f1;
+    }
+    #questionNumber {
+        font-weight: bold;
+        color: #00796b;
+        margin-bottom: 5px;
+    }
+    #question {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+    .options {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    button {
+        padding: 8px 12px;
+        margin: 5px;
+        border: none;
+        border-radius: 6px;
+        background: #00796b;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        font-size: 14px;
+        min-width: 120px;
+    }
+    button:hover {
+        background: #004d40;
+    }
+    #nextBtn {
+        background: #ff6f00;
+    }
+    #nextBtn:hover {
+        background: #e65100;
+    }
+    #feedback {
+        margin-top: 10px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    #score {
+        margin-top: 5px;
+        font-weight: bold;
+    }
+    .hint {
+        margin-top: 5px;
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Congratulations overlay */
+    #overlay {
+        position: fixed;
+        top:0; left:0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        color: #fff;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 100;
+    }
+    #overlay h2 {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+    #overlay p {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    #overlay button {
+        background: #ff6f00;
+        padding: 12px 20px;
+        font-size: 18px;
+    }
+    #overlay button:hover {
+        background: #e65100;
+    }
+</style>
+</head>
+<body>
+<div id="gameContainer">
+    <h1>Optics Puzzle Game</h1>
+    <div id="level">Level 1</div>
+    <canvas id="canvas" width="760" height="250"></canvas>
+    <div id="questionNumber"></div>
+    <div id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="hint" id="hint"></div>
+    <div id="feedback"></div>
+    <div style="margin-top:10px;">
+        <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Next Question ➡️</button>
+    </div>
+    <div id="score">Score: 0</div>
+</div>
+
+<div id="overlay">
+    <h2>🎉 Congratulations! 🎉</h2>
+    <p id="finalScore">Your Score: 0</p>
+    <button onclick="restartGame()">Restart 🔄</button>
+</div>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const questionDiv = document.getElementById('question');
+const questionNumberDiv = document.getElementById('questionNumber');
+const optionsDiv = document.getElementById('options');
+const feedbackDiv = document.getElementById('feedback');
+const scoreDiv = document.getElementById('score');
+const hintDiv = document.getElementById('hint');
+const nextBtn = document.getElementById('nextBtn');
+const overlay = document.getElementById('overlay');
+const finalScore = document.getElementById('finalScore');
+const levelDiv = document.getElementById('level');
+
+let score = 0;
+let currentLevel = 0;
+let currentQuestion = 0;
+
+const levels = [
+    [ 
+        {type:"identify", question:"Identify the type of lens:", lens:"convex", options:["Concave Lens","Convex Lens","Concave Mirror","Convex Mirror"], answer:"Convex Lens", draw:drawConvexLens},
+        {type:"identify", question:"Identify the type of lens:", lens:"concave", options:["Concave Lens","Convex Lens","Concave Mirror","Convex Mirror"], answer:"Concave Lens", draw:drawConcaveLens},
+        {type:"imageType", question:"What type of image is formed by convex lens if object is beyond focus?", options:["Real & Inverted","Virtual & Upright","Real & Upright","Virtual & Inverted"], answer:"Real & Inverted", draw:drawConvexLens},
+        {type:"imageType", question:"What type of image is formed by concave lens?", options:["Real & Inverted","Virtual & Upright","Real & Upright","Virtual & Inverted"], answer:"Virtual & Upright", draw:drawConcaveLens},
+        {type:"predictPosition", question:"Predict image position for convex lens (f=100px, u=200px):", focalLength:100, objectDistance:200, options:["66px","200px","300px","400px"], answer:"200px", draw:drawConvexLens}
+    ],
+    [ 
+        {type:"identify", question:"Identify the type of mirror:", options:["Concave Mirror","Convex Mirror"], answer:"Concave Mirror", draw:drawConcaveMirror},
+        {type:"identify", question:"Identify the type of mirror:", options:["Concave Mirror","Convex Mirror"], answer:"Convex Mirror", draw:drawConvexMirror},
+        {type:"imageType", question:"Image formed by concave mirror when object is at focus?", options:["Real & Inverted","Virtual & Upright"], answer:"Real & Inverted", draw:drawConcaveMirror},
+        {type:"imageType", question:"Image formed by convex mirror?", options:["Real & Inverted","Virtual & Upright"], answer:"Virtual & Upright", draw:drawConvexMirror},
+        {type:"predictPosition", question:"Predict image position for concave mirror (f=100px, u=150px):", focalLength:100, objectDistance:150, options:["60px","300px","150px","100px"], answer:"300px", draw:drawConcaveMirror}
+    ],
+    [ 
+        {type:"identify", question:"Identify the type of lens:", options:["Concave Lens","Convex Lens"], answer:"Convex Lens", draw:drawConvexLens},
+        {type:"predictPosition", question:"Predict image position for concave lens (f=-100px, u=200px):", focalLength:-100, objectDistance:200, options:["66px","200px","300px","400px"], answer:"66px", draw:drawConcaveLens},
+        {type:"imageType", question:"Type of image by concave mirror when object is beyond focus?", options:["Real & Inverted","Virtual & Upright"], answer:"Real & Inverted", draw:drawConcaveMirror},
+        {type:"imageType", question:"Type of image by convex lens when object is within focus?", options:["Real & Inverted","Virtual & Upright"], answer:"Virtual & Upright", draw:drawConvexLens},
+        {type:"predictPosition", question:"Predict image position for convex lens (f=80px, u=50px):", focalLength:80, objectDistance:50, options:["200px","66px","100px","40px"], answer:"200px", draw:drawConvexLens}
+    ]
+];
+
+function drawConvexLens(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.beginPath();ctx.moveTo(220,50);ctx.quadraticCurveTo(275,125,220,200);ctx.moveTo(330,50);ctx.quadraticCurveTo(275,125,330,200);ctx.strokeStyle="#ff5722";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#4caf50";ctx.fillRect(50,115,15,20);}
+function drawConcaveLens(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.beginPath();ctx.moveTo(220,50);ctx.quadraticCurveTo(250,125,220,200);ctx.moveTo(330,50);ctx.quadraticCurveTo(300,125,330,200);ctx.strokeStyle="#ff5722";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#4caf50";ctx.fillRect(50,115,15,20);}
+function drawConcaveMirror(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.beginPath();ctx.arc(275,125,100,1.25*Math.PI,1.75*Math.PI,false);ctx.strokeStyle="#ff5722";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#4caf50";ctx.fillRect(100,115,15,20);}
+function drawConvexMirror(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.beginPath();ctx.arc(275,125,100,1.25*Math.PI,1.75*Math.PI,true);ctx.strokeStyle="#ff5722";ctx.lineWidth=4;ctx.stroke();ctx.fillStyle="#4caf50";ctx.fillRect(100,115,15,20);}
+
+function showQuestion(){
+    nextBtn.style.display="none"; overlay.style.display="none";
+    const q = levels[currentLevel][currentQuestion];
+    q.draw();
+    questionDiv.textContent = q.question;
+    questionNumberDiv.textContent = `Question ${currentQuestion+1} of ${levels[currentLevel].length}`;
+    optionsDiv.innerHTML=""; feedbackDiv.textContent=""; hintDiv.textContent="";
+    levelDiv.textContent = `Level ${currentLevel+1}`;
+    q.options.forEach(option=>{const btn=document.createElement('button');btn.textContent=option;btn.addEventListener('click',()=>checkAnswer(option));optionsDiv.appendChild(btn);});
+}
+
+function checkAnswer(selected){
+    const q = levels[currentLevel][currentQuestion];
+    optionsDiv.querySelectorAll("button").forEach(b=>b.disabled=true);
+    if(selected===q.answer){feedbackDiv.textContent="✅ Correct!"; score+=10;}
+    else{feedbackDiv.textContent="❌ Wrong!"; hintDiv.textContent="Hint: "+generateHint(q);}
+    scoreDiv.textContent="Score: "+score;
+    nextBtn.style.display="inline-block";
+}
+
+function nextQuestion(){
+    currentQuestion++;
+    if(currentQuestion>=levels[currentLevel].length){currentLevel++; currentQuestion=0;}
+    if(currentLevel<levels.length){showQuestion();}
+    else{
+        overlay.style.display="flex";
+        finalScore.textContent = `Your Score: ${score}`;
+    }
+}
+
+function restartGame(){
+    score=0; currentLevel=0; currentQuestion=0;
+    scoreDiv.textContent="Score: 0";
+    overlay.style.display="none";
+    showQuestion();
+}
+
+function generateHint(q){
+    if(q.type==="identify") return "Observe the shape of the lens or mirror.";
+    if(q.type==="predictPosition") return "Use lens/mirror formula: 1/f = 1/v - 1/u or 1/f = 1/u + 1/v";
+    if(q.type==="imageType") return "Real images are formed where light rays converge.";
+    return "";
+}
+
+showQuestion();
+</script>
+</body>
+</html>

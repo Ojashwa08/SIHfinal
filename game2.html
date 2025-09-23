@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Projectile Motion</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+        .controls {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .control-group {
+            display: inline-block;
+            margin: 0 15px;
+        }
+        input[type="range"] {
+            width: 200px;
+        }
+        #results-box {
+            background-color: #e2f0f9;
+            border: 1px solid #cce7ff;
+            padding: 15px;
+            width: 50%;
+            margin: 0 auto;
+            border-radius: 8px;
+            text-align: left;
+        }
+        #results-box h3, #formulas-box h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        #formulas-box {
+            margin-top: 20px;
+            background-color: #f9e2e2;
+            border: 1px solid #ffcccc;
+            padding: 15px;
+            width: 50%;
+            margin: 20px auto;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .formula {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+        .formula strong {
+            display: inline-block;
+            min-width: 150px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Projectile Motion Simulator</h1>
+    <canvas id="projectileCanvas" width="800" height="400"></canvas>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="velocity">Initial Velocity (m/s):</label>
+            <input type="range" id="velocity" min="10" max="100" value="50">
+            <span id="velocityValue">50</span>
+        </div>
+        <div class="control-group">
+            <label for="angle">Launch Angle (degrees):</label>
+            <input type="range" id="angle" min="0" max="90" value="45">
+            <span id="angleValue">45</span>
+        </div>
+        <button id="launchBtn">Launch!</button>
+    </div>
+
+    <div id="results-box">
+        <h3>Results</h3>
+        <p><strong>Distance Covered:</strong> <span id="distanceResult">0</span> m</p>
+        <p><strong>Total Time of Flight:</strong> <span id="timeOfFlightResult">0</span> s</p>
+        <p><strong>Maximum Height:</strong> <span id="maxHeightResult">0</span> m</p>
+        <p><strong>Final Speed:</strong> <span id="finalSpeedResult">0</span> m/s</p>
+        <p><strong>Final Angle:</strong> <span id="finalAngleResult">0</span>°</p>
+    </div>
+
+    <div id="formulas-box">
+        <h3>Formulas</h3>
+        <div class="formula"><strong>Horizontal Range (R):</strong> R = v₀²sin(2&theta;)/g</div>
+        <div class="formula"><strong>Maximum Height (H):</strong> H = (v₀sin&theta;)²/2g</div>
+        <div class="formula"><strong>Time of Flight (T):</strong> T = 2v₀sin&theta;/g</div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('projectileCanvas');
+        const ctx = canvas.getContext('2d');
+        const velocityInput = document.getElementById('velocity');
+        const angleInput = document.getElementById('angle');
+        const velocityValueSpan = document.getElementById('velocityValue');
+        const angleValueSpan = document.getElementById('angleValue');
+        const launchBtn = document.getElementById('launchBtn');
+
+        const distanceResultSpan = document.getElementById('distanceResult');
+        const timeOfFlightResultSpan = document.getElementById('timeOfFlightResult');
+        const maxHeightResultSpan = document.getElementById('maxHeightResult');
+        const finalSpeedResultSpan = document.getElementById('finalSpeedResult');
+        const finalAngleResultSpan = document.getElementById('finalAngleResult');
+
+        
+        const G = 9.8;
+        const TIMESTEP = 0.05; 
+
+       
+        let x = 0;
+        let y = 0;
+        let vx = 0;
+        let vy = 0;
+        let initialVelocity = 0;
+        let launchAngle = 0;
+        let isLaunched = false;
+        let trail = [];
+
+       
+        velocityInput.oninput = () => { velocityValueSpan.textContent = velocityInput.value; };
+        angleInput.oninput = () => { angleValueSpan.textContent = angleInput.value; };
+
+        
+        launchBtn.onclick = () => {
+            initialVelocity = parseFloat(velocityInput.value);
+            launchAngle = parseFloat(angleInput.value);
+            const angleInRad = (launchAngle * Math.PI) / 180;
+
+            
+            x = 0;
+            y = 0;
+            vx = initialVelocity * Math.cos(angleInRad);
+            vy = -initialVelocity * Math.sin(angleInRad);
+            isLaunched = true;
+            trail = [];
+            
+            
+            distanceResultSpan.textContent = 0;
+            timeOfFlightResultSpan.textContent = 0;
+            maxHeightResultSpan.textContent = 0;
+            finalSpeedResultSpan.textContent = 0;
+            finalAngleResultSpan.textContent = 0;
+        };
+
+        
+        function updateResults() {
+            
+            distanceResultSpan.textContent = x.toFixed(2);
+
+           
+            const timeOfFlight = (2 * initialVelocity * Math.sin((launchAngle * Math.PI) / 180)) / G;
+            timeOfFlightResultSpan.textContent = timeOfFlight.toFixed(2);
+
+           
+            const maxHeight = Math.pow(initialVelocity * Math.sin((launchAngle * Math.PI) / 180), 2) / (2 * G);
+            maxHeightResultSpan.textContent = maxHeight.toFixed(2);
+
+           
+            const finalVy = initialVelocity * Math.sin((launchAngle * Math.PI) / 180) - G * timeOfFlight;
+            const finalSpeed = Math.sqrt(vx * vx + finalVy * finalVy);
+            finalSpeedResultSpan.textContent = finalSpeed.toFixed(2);
+            
+          
+            const finalAngleInRad = Math.atan2(finalVy, vx);
+            const finalAngleInDeg = finalAngleInRad * 180 / Math.PI;
+            finalAngleResultSpan.textContent = Math.abs(finalAngleInDeg).toFixed(2);
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (isLaunched) {
+                x += vx * TIMESTEP;
+                vy += G * TIMESTEP;
+                y += vy * TIMESTEP;
+
+                if (y > 0) {
+                    y = 0;
+                    isLaunched = false;
+                    updateResults();
+                }
+
+                trail.push({ x, y });
+            }
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            for (let i = 1; i < trail.length; i++) {
+                ctx.moveTo(trail[i-1].x, canvas.height + trail[i-1].y);
+                ctx.lineTo(trail[i].x, canvas.height + trail[i].y);
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(x, canvas.height + y, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = 'red';
+            ctx.fill();
+            
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
