@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Odia Quiz Game</title>
+  <style>
+    body {
+      font-family: "Noto Sans Oriya", Arial, sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .quiz-container {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      width: 400px;
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 20px;
+    }
+    .option {
+      display: block;
+      margin: 8px 0;
+      padding: 10px;
+      background: #eee;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .option:hover {
+      background: #dcdcdc;
+    }
+    .correct {
+      background: #a6e6a6 !important;
+    }
+    .wrong {
+      background: #f5a6a6 !important;
+    }
+    #next-btn {
+      margin-top: 15px;
+      padding: 10px 20px;
+      border: none;
+      background: #4caf50;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h2 id="question">ପ୍ରଶ୍ନ</h2>
+    <p id="translation">(English translation here)</p>
+    <div id="options"></div>
+    <button id="next-btn">Next</button>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "ଭାରତର ରାଜଧାନୀ କ'ଣ?",
+        translation: "What is the capital of India?",
+        options: ["ଭୁବନେଶ୍ୱର (Bhubaneswar)", "ନୂଆଦିଲ୍ଲୀ (New Delhi)", "କଟକ (Cuttack)", "କୋଲକାତା (Kolkata)"],
+        answer: 1
+      },
+      {
+        question: "ଓଡିଶାର ରାଜ୍ୟ ପକ୍ଷୀ କ'ଣ?",
+        translation: "What is the state bird of Odisha?",
+        options: ["ମୟୂର (Peacock)", "ହାଁସ (Swan)", "ବାତକୁଳି (Crow)", "ସାରସ (Stork)"],
+        answer: 0
+      },
+      {
+        question: "ଗଣିତରେ 7 × 8 = ?",
+        translation: "In Mathematics, 7 × 8 = ?",
+        options: ["56", "48", "64", "54"],
+        answer: 0
+      }
+    ];
+
+    let currentQuestion = 0;
+    const questionEl = document.getElementById("question");
+    const translationEl = document.getElementById("translation");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("next-btn");
+
+    function loadQuestion() {
+      const q = quizData[currentQuestion];
+      questionEl.textContent = q.question;
+      translationEl.textContent = q.translation;
+      optionsEl.innerHTML = "";
+      q.options.forEach((opt, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = opt;
+        btn.classList.add("option");
+        btn.onclick = () => checkAnswer(index, btn);
+        optionsEl.appendChild(btn);
+      });
+      nextBtn.style.display = "none";
+    }
+
+    function checkAnswer(selected, btn) {
+      const correct = quizData[currentQuestion].answer;
+      const buttons = document.querySelectorAll(".option");
+      buttons.forEach((b, i) => {
+        if (i === correct) b.classList.add("correct");
+        if (i === selected && i !== correct) b.classList.add("wrong");
+        b.disabled = true;
+      });
+      nextBtn.style.display = "inline-block";
+    }
+
+    nextBtn.onclick = () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        document.querySelector(".quiz-container").innerHTML = "<h2>🎉 Quiz Finished!</h2>";
+      }
+    };
+
+    loadQuestion();
+  </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="or">
+<head>
+  <meta charset="UTF-8">
+  <title>Odia Physics Animation - Grade 9</title>
+  <style>
+    body {
+      font-family: "Noto Sans Oriya", Arial, sans-serif;
+      text-align: center;
+      background: #f0f8ff;
+      padding: 20px;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    canvas {
+      border: 2px solid #333;
+      background: #fff;
+      margin-top: 20px;
+    }
+    button {
+      margin: 15px 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background: #1976d2;
+      color: #fff;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <h2>ନ୍ୟୁଟନର ପ୍ରଥମ ନିୟମ (Newton's First Law)</h2>
+  <p>ଯେତେବେଳେ କୋଣସି ବାହ୍ୟ ଶକ୍ତି ଲାଗୁନାହିଁ, ବସ୍ତୁ ସ୍ଥିର ରହେ କିମ୍ବା ସମଗତିରେ ଗତି କରେ।</p>
+  
+  <canvas id="physicsCanvas" width="600" height="200"></canvas>
+  <br>
+  <button onclick="startMotion()">Start Motion</button>
+  <button onclick="stopMotion()">Stop</button>
+  <button onclick="playAudio()">🔊 Odia Voice</button>
+
+  <!-- Hidden YouTube iframe for audio -->
+  <div id="player" style="display:none;"></div>
+
+  <script>
+    // ----------------- Canvas Animation -----------------
+    const canvas = document.getElementById("physicsCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let x = 50;   
+    let speed = 2;
+    let moving = false;
+
+    function drawBall() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.arc(x, 100, 20, 0, Math.PI * 2);
+      ctx.fillStyle = "#e74c3c";
+      ctx.fill();
+      ctx.closePath();
+    }
+
+    function update() {
+      if (moving) {
+        x += speed;
+        if (x > canvas.width - 20) x = 20; 
+      }
+      drawBall();
+      requestAnimationFrame(update);
+    }
+
+    function startMotion() { moving = true; }
+    function stopMotion() { moving = false; }
+
+    update();
+
+    // ----------------- YouTube API for Odia Voice -----------------
+    let player;
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: '0',
+        width: '0',
+        videoId: 'g0WWW3eJSGc', // Replace with your YouTube video ID
+        playerVars: {
+          'autoplay': 0,
+          'controls': 0
+        }
+      });
+    }
+
+    function playAudio() {
+      if(player) player.playVideo();
+    }
+
+    // Load YouTube IFrame API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+  </script>
+</body>
+</html>
+

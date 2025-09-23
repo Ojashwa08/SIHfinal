@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Odia Puzzle Game - Class 8 & 9</title>
+  <style>
+    body {
+      font-family: "Noto Sans Oriya", Arial, sans-serif;
+      background: #f2f6fc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .game-container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.2);
+      text-align: center;
+      width: 500px;
+    }
+    h2 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+    #scrambled {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 15px 0;
+      letter-spacing: 6px;
+      color: #444;
+    }
+    input {
+      padding: 10px;
+      font-size: 20px;
+      width: 80%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-top: 10px;
+    }
+    button {
+      margin-top: 12px;
+      padding: 10px 22px;
+      font-size: 16px;
+      border: none;
+      background: #1976d2;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0d47a1;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #translation {
+      font-style: italic;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h2>Odia Word Puzzle (Class 8–9)</h2>
+    <p id="translation">(English meaning here)</p>
+    <div id="scrambled"></div>
+    <input type="text" id="answer" placeholder="Type the correct Odia word">
+    <br>
+    <button onclick="checkAnswer()">Check</button>
+    <button onclick="nextWord()">Next</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    const words = [
+      { word: "ପ୍ରଜାତନ୍ତ୍ର", translation: "Democracy" },
+      { word: "ସ୍ୱାଧୀନତା", translation: "Freedom / Independence" },
+      { word: "ଜଳବାୟୁ", translation: "Climate" },
+      { word: "ବିଜ୍ଞାନ", translation: "Science" },
+      { word: "ଭୂଗୋଳ", translation: "Geography" },
+      { word: "ପରିବେଶ", translation: "Environment" },
+      { word: "ଗଣତନ୍ତ୍ର", translation: "Republic" },
+      { word: "ରାସାୟନିକ", translation: "Chemical" },
+      { word: "ଶକ୍ତି", translation: "Energy / Power" },
+      { word: "ଇତିହାସ", translation: "History" }
+    ];
+
+    let current = 0;
+
+    function shuffleWord(word) {
+      return word.split("").sort(() => Math.random() - 0.5).join("");
+    }
+
+    function loadWord() {
+      const item = words[current];
+      const scrambled = shuffleWord(item.word);
+      document.getElementById("scrambled").textContent = scrambled;
+      document.getElementById("translation").textContent = item.translation;
+      document.getElementById("answer").value = "";
+      document.getElementById("result").textContent = "";
+    }
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById("answer").value.trim();
+      if (userAnswer === words[current].word) {
+        document.getElementById("result").textContent = "✅ Correct!";
+        document.getElementById("result").style.color = "green";
+      } else {
+        document.getElementById("result").textContent = "❌ Wrong! Correct word: " + words[current].word;
+        document.getElementById("result").style.color = "red";
+      }
+    }
+
+    function nextWord() {
+      current = (current + 1) % words.length;
+      loadWord();
+    }
+
+    loadWord();
+  </script>
+</body>
+</html>
