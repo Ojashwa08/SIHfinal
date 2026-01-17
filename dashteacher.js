@@ -1,243 +1,148 @@
-/**
- * EduPulse Teacher Dashboard Logic
- * Features: LocalStorage persistence, Chart.js integration, Risk Analytics
- */
+// SeekhExplore Teacher Dashboard Logic
+// Strictly adhering to "Render Once, Update Only" architecture
 
-// Global State
-let students = JSON.parse(localStorage.getItem('ep_students')) || [];
-let scoreChart, passChart, scatterChart;
-
-// DOM Elements
-const tableBody = document.getElementById('tableBody');
-const studentForm = document.getElementById('studentForm');
-const modal = document.getElementById('studentModal');
-const searchInput = document.getElementById('searchInput');
-
-// --- Initialization ---
-window.onload = () => {
-    initCharts();
-    updateUI();
-};
-
-// --- CRUD Operations ---
-
-studentForm.onsubmit = (e) => {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    // Initial Run of all update functions
+    updateOverview();
+    updateScreenTime();
+    updateVisualAnalytics();
     
-    const editIndex = document.getElementById('editIndex').value;
-    const newStudent = {
-        rollNo: document.getElementById('rollNo').value,
-        name: document.getElementById('fullName').value,
-        attendance: parseInt(document.getElementById('attendance').value),
-        score: parseInt(document.getElementById('score').value),
-        acadTime: parseInt(document.getElementById('acadTime').value),
-        idleTime: parseInt(document.getElementById('idleTime').value),
-        timestamp: new Date().getTime()
+    // Setup Search Listener
+    const searchInput = document.getElementById('student-search');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', filterStudents);
+    }
+});
+
+/* -----------------------------------------------------------
+   1. OVERVIEW SECTION UPDATES
+   Updates the 4 main stat cards with fetched data.
+----------------------------------------------------------- */
+function updateOverview() {
+    // Simulated data fetching
+    const data = {
+        totalStudents: 108,
+        avgScore: 78,
+        highestScore: 98,
+        passRate: 92
     };
 
-    if (editIndex === "") {
-        students.push(newStudent);
-    } else {
-        students[editIndex] = newStudent;
-    }
-
-    saveAndRefresh();
-    closeModal();
-};
-
-function deleteStudent(index) {
-    if (confirm("Remove this student from the registry?")) {
-        students.splice(index, 1);
-        saveAndRefresh();
-    }
+    // DOM Updates
+    document.getElementById('total-students').textContent = data.totalStudents;
+    document.getElementById('avg-score').textContent = data.avgScore + '%';
+    document.getElementById('highest-score').textContent = data.highestScore + '%';
+    document.getElementById('pass-rate').textContent = data.passRate + '%';
 }
 
-function editStudent(index) {
-    const s = students[index];
-    document.getElementById('modalTitle').innerText = "Edit Student";
-    document.getElementById('editIndex').value = index;
-    document.getElementById('rollNo').value = s.rollNo;
-    document.getElementById('fullName').value = s.name;
-    document.getElementById('attendance').value = s.attendance;
-    document.getElementById('score').value = s.score;
-    document.getElementById('acadTime').value = s.acadTime;
-    document.getElementById('idleTime').value = s.idleTime;
+/* -----------------------------------------------------------
+   2. SCREEN TIME ANALYTICS
+   Updates the text and progress bars for time metrics.
+----------------------------------------------------------- */
+function updateScreenTime() {
+    // Simulated data
+    const screenData = {
+        academicHours: 4,
+        academicMins: 15,
+        idleHours: 1,
+        idleMins: 30,
+        focusPercentage: 75 // Used for progress bar width
+    };
+
+    // Text Updates
+    document.getElementById('academic-time').textContent = 
+        `${screenData.academicHours}h ${screenData.academicMins}m`;
     
-    modal.style.display = 'block';
+    document.getElementById('idle-time').textContent = 
+        `${screenData.idleHours}h ${screenData.idleMins}m`;
+
+    // CSS Visual Update (Progress Bar)
+    const progressBar = document.getElementById('academic-progress');
+    if (progressBar) {
+        progressBar.style.width = `${screenData.focusPercentage}%`;
+    }
 }
 
-// --- Analytics & Logic ---
+/* -----------------------------------------------------------
+   3. VISUAL ANALYTICS (CSS ONLY)
+   Updates Bar Chart Heights and Pie Chart Gradient.
+   No Canvas, No SVG manipulation, just CSS properties.
+----------------------------------------------------------- */
+function updateVisualAnalytics() {
+    // --- Bar Chart Data (Weekly Engagement) ---
+    // Values represent percentage height (0-100)
+    const weeklyData = {
+        mon: 45,
+        tue: 60,
+        wed: 85,
+        thu: 70,
+        fri: 55
+    };
 
-function calculateRisk(s) {
-    // Logic: Low score (<40) OR low attendance (<60) OR idle time > academic time
-    let riskPoints = 0;
-    if (s.score < 40) riskPoints += 2;
-    if (s.attendance < 60) riskPoints += 2;
-    if (s.idleTime > s.acadTime) riskPoints += 1;
-
-    if (riskPoints >= 3) return { label: "High Risk", class: "bg-danger" };
-    if (riskPoints >= 1) return { label: "Medium", class: "bg-warning" };
-    return { label: "On Track", class: "bg-success" };
-}
-
-function classifyFocus(s) {
-    const totalTime = s.acadTime + s.idleTime;
-    if (totalTime === 0) return { label: "No Data", class: "bg-secondary" };
-    
-    const ratio = s.acadTime / totalTime;
-    if (ratio > 0.75) return { label: "Focused", class: "bg-success" };
-    if (ratio > 0.40) return { label: "Mixed", class: "bg-primary" };
-    return { label: "Distracted", class: "bg-danger" };
-}
-
-// --- UI Rendering ---
-
-function updateUI(filteredStudents = students) {
-    renderTable(filteredStudents);
-    updateStats();
-    updateCharts();
-}
-
-function renderTable(data) {
-    tableBody.innerHTML = "";
-    document.getElementById('noData').classList.toggle('hidden', data.length > 0);
-
-    data.forEach((s, index) => {
-        const risk = calculateRisk(s);
-        const focus = classifyFocus(s);
-        
-        const row = `
-            <tr>
-                <td>#${s.rollNo}</td>
-                <td><strong>${s.name}</strong></td>
-                <td>${s.score}%</td>
-                <td>${s.attendance}%</td>
-                <td><span class="badge ${focus.class}">${focus.label}</span></td>
-                <td><span class="badge ${risk.class}">${risk.label}</span></td>
-                <td>
-                    <button class="btn btn-secondary" style="padding: 4px 8px;" onclick="editStudent(${index})">Edit</button>
-                    <button class="btn btn-secondary text-danger" style="padding: 4px 8px; border-color: #fca5a5;" onclick="deleteStudent(${index})">Delete</button>
-                </td>
-            </tr>
-        `;
-        tableBody.innerHTML += row;
-    });
-}
-
-function updateStats() {
-    const total = students.length;
-    const avg = total > 0 ? Math.round(students.reduce((a, b) => a + b.score, 0) / total) : 0;
-    const passCount = students.filter(s => s.score >= 40).length;
-    const passRate = total > 0 ? Math.round((passCount / total) * 100) : 0;
-    const riskCount = students.filter(s => calculateRisk(s).label === "High Risk").length;
-
-    document.getElementById('statTotal').innerText = total;
-    document.getElementById('statAvg').innerText = `${avg}%`;
-    document.getElementById('avgBar').style.width = `${avg}%`;
-    document.getElementById('statPassRate').innerText = `${passRate}%`;
-    document.getElementById('statRiskCount').innerText = riskCount;
-}
-
-function saveAndRefresh() {
-    localStorage.setItem('ep_students', JSON.stringify(students));
-    updateUI();
-}
-
-// --- Charts ---
-
-function initCharts() {
-    const ctxScore = document.getElementById('scoreChart').getContext('2d');
-    scoreChart = new Chart(ctxScore, {
-        type: 'bar',
-        data: { labels: ['0-40', '41-60', '61-80', '81-100'], datasets: [{ label: 'Students', data: [0,0,0,0], backgroundColor: '#6366f1' }] },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    const ctxPass = document.getElementById('passChart').getContext('2d');
-    passChart = new Chart(ctxPass, {
-        type: 'pie',
-        data: { labels: ['Pass', 'Fail'], datasets: [{ data: [0, 0], backgroundColor: ['#10b981', '#ef4444'] }] },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-
-    const ctxScatter = document.getElementById('scatterChart').getContext('2d');
-    scatterChart = new Chart(ctxScatter, {
-        type: 'scatter',
-        data: { datasets: [{ label: 'Performance Correlation', data: [], backgroundColor: '#6366f1' }] },
-        options: {
-            scales: { x: { title: { display: true, text: 'Attendance %' } }, y: { title: { display: true, text: 'Score %' } } },
-            responsive: true, maintainAspectRatio: false
+    // Update CSS Variable --height for each bar
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+    days.forEach(day => {
+        const bar = document.getElementById(`bar-${day}`);
+        if (bar) {
+            // Adding '%' string for CSS value
+            bar.style.setProperty('--height', `${weeklyData[day]}%`);
         }
     });
-}
 
-function updateCharts() {
-    if (!scoreChart) return;
+    // --- Pie Chart Data (Topic Mastery) ---
+    // Breakdown: Advanced (Green), Proficient (Blue), Basic (Orange)
+    // We construct a conic-gradient string.
+    const mastery = {
+        advanced: 40,   // 0% to 40%
+        proficient: 35, // 40% to 75% (40+35)
+        basic: 25       // 75% to 100%
+    };
 
-    // Update Score Distribution
-    const dist = [
-        students.filter(s => s.score < 40).length,
-        students.filter(s => s.score >= 40 && s.score < 60).length,
-        students.filter(s => s.score >= 60 && s.score < 80).length,
-        students.filter(s => s.score >= 80).length
-    ];
-    scoreChart.data.datasets[0].data = dist;
-    scoreChart.update();
-
-    // Update Pass/Fail
-    const passed = students.filter(s => s.score >= 40).length;
-    passChart.data.datasets[0].data = [passed, students.length - passed];
-    passChart.update();
-
-    // Update Scatter
-    scatterChart.data.datasets[0].data = students.map(s => ({ x: s.attendance, y: s.score }));
-    scatterChart.update();
-}
-
-// --- Utilities ---
-
-function exportCSV() {
-    if (students.length === 0) return alert("No data to export.");
-    
-    let csv = "Roll No,Name,Score,Attendance,Acad Mins,Idle Mins,Risk\n";
-    students.forEach(s => {
-        csv += `${s.rollNo},${s.name},${s.score},${s.attendance},${s.acadTime},${s.idleTime},${calculateRisk(s).label}\n`;
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `EduPulse_Report_${new Date().toLocaleDateString()}.csv`;
-    a.click();
-}
-
-// Search Logic
-searchInput.oninput = (e) => {
-    const val = e.target.value.toLowerCase();
-    const filtered = students.filter(s => 
-        s.name.toLowerCase().includes(val) || s.rollNo.toString().includes(val)
-    );
-    renderTable(filtered);
-};
-
-// --- Modal Controls ---
-document.getElementById('openModalBtn').onclick = () => {
-    document.getElementById('modalTitle').innerText = "Add New Student";
-    document.getElementById('studentForm').reset();
-    document.getElementById('editIndex').value = "";
-    modal.style.display = 'block';
-};
-
-function closeModal() { modal.style.display = 'none'; }
-document.querySelector('.close-modal').onclick = closeModal;
-window.onclick = (e) => { if (e.target == modal) closeModal(); };
-
-document.getElementById('exportBtn').onclick = exportCSV;
-
-document.getElementById('clearAllBtn').onclick = () => {
-    if (confirm("DANGER: This will delete all students from your browser database. Continue?")) {
-        students = [];
-        saveAndRefresh();
+    const pie = document.getElementById('mastery-pie');
+    if (pie) {
+        // Calculate stops
+        const stop1 = mastery.advanced;
+        const stop2 = stop1 + mastery.proficient;
+        
+        // Apply Conic Gradient
+        // color-1: var(--success) #10b981
+        // color-2: var(--info) #3b82f6
+        // color-3: var(--warning) #f59e0b
+        pie.style.background = `conic-gradient(
+            #10b981 0% ${stop1}%, 
+            #3b82f6 ${stop1}% ${stop2}%, 
+            #f59e0b ${stop2}% 100%
+        )`;
     }
-};
+}
+
+/* -----------------------------------------------------------
+   4. STUDENT TABLE FILTERING
+   Hides/Shows existing HTML rows based on input.
+   Does NOT create or delete DOM nodes.
+----------------------------------------------------------- */
+function filterStudents() {
+    const input = document.getElementById('student-search');
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById('student-table');
+    const tr = table.getElementsByTagName('tr');
+
+    // Loop through all table rows, and hide those who don't match the search query
+    // Start at i=1 to skip the header row
+    for (let i = 1; i < tr.length; i++) {
+        // Column 0 is Roll No, Column 1 is Name
+        const tdRoll = tr[i].getElementsByTagName('td')[0];
+        const tdName = tr[i].getElementsByTagName('td')[1];
+        
+        if (tdRoll && tdName) {
+            const txtValueRoll = tdRoll.textContent || tdRoll.innerText;
+            const txtValueName = tdName.textContent || tdName.innerText;
+            
+            if (txtValueRoll.toUpperCase().indexOf(filter) > -1 || 
+                txtValueName.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = ""; // Show
+            } else {
+                tr[i].style.display = "none"; // Hide
+            }
+        }       
+    }
+}
