@@ -3,35 +3,33 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>STEM Learning — Login</title>
+  <title>SEEKH EXPLORE</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#007bff">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
 </head>
 <body>
   <div class="page-bg">
     <div class="card" role="main" aria-label="Login card">
       <header class="card-header">
-        <div class="logo">🎓</div>
-        <h1 class="title">STEM Learning</h1>
+        <h1 class="title">🚀 STEM Learning</h1>
         <p class="subtitle">Gamified Education Platform</p>
       </header>
 
       <nav class="tab-bar" role="tablist" aria-label="Login tabs">
-        <button type="button" id="studentTab" class="tab active" role="tab" >⏳ Student</button>
-        <button type="button" id="teacherTab" class="tab" role="tab" >🧑‍🏫 Teacher</button>
+        <button type="button" id="studentTab" class="tab active" role="tab">🏆 Student</button>
+        <button type="button" id="teacherTab" class="tab" role="tab">🧠 Teacher</button>
       </nav>
 
       <section class="card-body">
-       
         <form id="studentForm" class="form-section active" autocomplete="off">
-          <h2 class="form-title">Student Login</h2>
+          <h2 class="form-title">Ready to level up?</h2>
           <label for="studentEmail">Email Address</label>
           <input id="studentEmail" type="email" placeholder="student@demo.com" required />
           <label for="studentPassword">Password</label>
           <input id="studentPassword" type="password" placeholder="demo123" required />
-          <button type="submit" class="btn login-btn" onclick="login()">Login</button>
-
+          <button type="submit" class="btn login-btn" onclick="login()">Access Game World</button>
           <div class="message" aria-live="polite"></div>
         </form>
 
@@ -42,12 +40,11 @@
           <label for="teacherPassword">Password</label>
           <input id="teacherPassword" type="password" placeholder="demo123" required />
           <button type="submit" class="btn login-btn" onclick="login()">Login</button>
-
           <div class="message" aria-live="polite"></div>
         </form>
 
         <div class="demo-block">
-          <p class="demo-title">🎮 Try Demo Accounts</p>
+          <p class="demo-title">🎯 Quest Log: Try Demo Accounts</p>
           <div class="demo-creds"><strong>Student:</strong> student@demo.com / demo123</div>
           <div class="demo-creds"><strong>Teacher:</strong> teacher@demo.com / demo123</div>
           <div class="demo-actions">
@@ -60,5 +57,6 @@
   </div>
 
   <script src="first.js"></script>
+
 </body>
 </html>
