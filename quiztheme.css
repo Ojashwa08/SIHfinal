@@ -1,190 +1,178 @@
 :root {
-    --bg-primary: #f0f4f8;
-    --bg-secondary: #e6edf4; 
-    --glass-white: rgba(255, 255, 255, 0.65); 
-    --glass-border: rgba(255, 255, 255, 0.85); 
-    --text-primary: #1e2840; 
-    --text-secondary: #607d8b; 
-    --accent-pending: #007bff; 
-    --accent-correct: #4caf50; 
-    --accent-incorrect: #f44336; 
-    --shadow-subtle: 0 8px 30px rgba(0, 0, 0, 0.1);
-    --shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.2);
+    /* Sophisticated Dashboard Palette */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #e2e8f0; 
+    --glass-white: rgba(255, 255, 255, 0.7); 
+    --glass-border: rgba(255, 255, 255, 0.4); 
+    
+    --text-primary: #1e293b;  /* Slate 800 */
+    --text-secondary: #475569; /* Slate 600 */
+    
+    /* Academic Status Colors */
+    --accent-pending: #2563eb;  /* Educational Blue */
+    --accent-correct: #059669;  /* Emerald Green */
+    --accent-incorrect: #dc2626; /* Soft Red */
+    
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 }
 
-@keyframes radial-pulse {
-    0% { background-position: 50% 50%; opacity: 0.8; }
-    50% { background-position: 60% 40%; opacity: 0.9; }
-    100% { background-position: 50% 50%; opacity: 0.8; }
-}
-
-@keyframes glow-highlight {
-    0% { box-shadow: 0 0 5px var(--accent-pending); }
-    50% { box-shadow: 0 0 15px rgba(0, 123, 255, 0.7), 0 0 5px var(--accent-pending) inset; }
-    100% { box-shadow: 0 0 5px var(--accent-pending); }
+/* 1. Animated Data-Stream Background */
+@keyframes wave {
+    0% { transform: translateX(0) translateZ(0) scaleY(1); }
+    50% { transform: translateX(-25%) translateZ(0) scaleY(0.8); }
+    100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
 }
 
 body {
     margin: 0;
-    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     color: var(--text-primary);
-    text-align: center;
     min-height: 100vh;
+    background: var(--bg-primary);
     overflow-x: hidden;
-    
-    background: 
-        radial-gradient(
-            circle at 50% 50%, 
-            rgba(0, 123, 255, 0.1), 
-            rgba(255, 255, 255, 0.0) 70% 
-        ),
-        linear-gradient(145deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-        
-    background-size: 300% 300%; 
-    background-attachment: fixed;
-    animation: radial-pulse 100s ease-in-out infinite alternate; 
-}
-
-header {
-    padding: 30px 20px;
-    background: var(--bg-primary); 
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: var(--accent-pending);
-    border-bottom: 2px solid var(--accent-pending);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     position: relative;
-    z-index: 10;
 }
 
-.stat-display {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--accent-pending);
-    text-shadow: none; 
-    transition: all 0.3s ease-in-out;
+/* Background Abstract Waves */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 200%; height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+                linear-gradient(120deg, #f1f5f9 0%, #e2e8f0 100%);
+    z-index: -1;
+    animation: wave 25s infinite linear;
+    opacity: 0.6;
 }
 
-.games-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
-    padding: 40px 20px;
-    max-width: 1200px;
-    margin: auto;
+/* 2. Interactive Learning Dashboard Header */
+header {
+    padding: 2rem;
+    background: var(--glass-white);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.game-card {
-    background: var(--glass-white); 
-    backdrop-filter: blur(18px); 
-    -webkit-backdrop-filter: blur(18px); 
-    border-radius: 16px;
-    padding: 30px; 
+/* 3. Sleek Progress Indicator */
+.progress-container {
     width: 100%;
-    text-align: left; 
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
-    box-shadow: var(--shadow-subtle);
-    border: 1px solid var(--glass-border); 
+    height: 6px;
+    background: var(--bg-secondary);
+    position: absolute;
+    bottom: 0;
+    left: 0;
 }
 
-.game-card:hover {
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); 
-    transform: translateY(-5px); 
-    border-color: var(--accent-pending);
-}
-
-.game-card h2 {
-    margin: 0 0 10px;
-    font-family: 'Georgia', serif; 
-    font-size: 1.8rem;
-    font-weight: 400; 
-    color: var(--text-primary);
-}
-
-.game-card p {
-    margin: 0 0 20px;
-    font-size: 1rem;
-    color: var(--text-secondary);
-}
-
-.game-card a {
-    display: inline-block;
-    padding: 10px 20px;
+.progress-bar {
+    height: 100%;
     background: var(--accent-pending);
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease-out;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    width: 45%; /* Dynamic */
+    transition: width 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.3);
 }
 
-.game-card a:hover {
-    background: #0056b3;
-    transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-.answer-choice {
-    margin-top: 15px;
-    padding: 16px 20px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 500;
-    font-size: 1.05rem;
-    cursor: pointer;
-    width: 100%;
-    display: block;
+/* 4. Question Card (The "Brain" of the UI) */
+.game-card {
+    background: var(--glass-white);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.5);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: var(--shadow-glass);
+    max-width: 800px;
+    margin: 3rem auto;
+    transition: transform 0.4s ease;
+}
+
+/* Question Typography (Serif) */
+.game-card h2 {
+    font-family: 'Charter', 'Georgia', serif;
+    font-size: 2.2rem;
+    line-height: 1.3;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    font-weight: 500;
+    text-align: left;
+}
+
+/* 5. Answer Choices (Modern Sans-Serif) */
+.answer-choice {
+    font-family: 'Inter', sans-serif;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid var(--glass-border);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
     color: var(--text-secondary);
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    font-weight: 500;
 }
 
-.footer {
-    margin-top: 30px;
-    padding-bottom: 40px;
-    text-align: center;
+.answer-choice:hover {
+    background: white;
+    transform: translateX(8px);
+    border-color: var(--accent-pending);
+    color: var(--accent-pending);
 }
 
-.footer footer {
-    color: var(--text-secondary);
-    margin-bottom: 10px;
+/* State: Selected/Correct/Incorrect */
+.answer-choice.selected {
+    border-color: var(--accent-pending);
+    background: rgba(37, 99, 235, 0.05);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.answer-choice.correct {
+    border-color: var(--accent-correct);
+    background: rgba(5, 150, 105, 0.05);
+    color: var(--accent-correct);
+}
+
+.answer-choice.incorrect {
+    border-color: var(--accent-incorrect);
+    background: rgba(220, 38, 38, 0.05);
+    color: var(--accent-incorrect);
+}
+
+/* 6. Dashboard Controls */
 .footer a {
-    display: inline-block;
-    padding: 14px 30px;
-    background: var(--accent-pending); 
-    color: white; 
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: 700;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    background: var(--text-primary);
+    color: white;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
 }
 
 .footer a:hover {
-    background: #0056b3; 
-    color: white;
-    transform: translateY(-4px); 
-    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.6); 
+    background: var(--accent-pending);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
 }
 
-@media (max-width: 600px) {
-    .games-container {
-        grid-template-columns: 1fr;
-        padding: 20px 15px;
-    }
+/* Responsive Polish */
+@media (max-width: 768px) {
     .game-card {
-        padding: 25px;
+        margin: 1rem;
+        padding: 1.5rem;
     }
+    
     .game-card h2 {
         font-size: 1.6rem;
-    }
-    .footer a {
-        padding: 12px 25px;
     }
 }
