@@ -1,275 +1,147 @@
-/* ====== Root Variables ====== */
-:root {
-  /* Light Mode */
-  --bg-light: #f3f4f6;
-  --card-light: #ffffff;
-  --accent-light: #3b82f6;
-  --muted-light: #4b5563;
-  --glass-light: rgba(0,0,0,0.03);
-
-  /* Dark Mode */
-  --bg-dark: #0f1724;
-  --card-dark: #0b1220;
-  --accent-dark: #7dd3fc;
-  --muted-dark: #94a3b8;
-  --glass-dark: rgba(255,255,255,0.04);
-
-  --success: #22c55e;
-  --error: #ef4444;
-  --gold: #FFD700;
+ :root {
+    --pastel-blue: #b2d7e5;
+    --pastel-mint: #c9e8e5;
+    --pastel-pink: #f0d9d9;
+    --pastel-lavender: #d6ccff;
+    --bg-light: #f4f7f6;
+    --text-dark: #3a4750;
+    --accent-color: #5b5c92; 
+    --shadow-subtle: 0 4px 10px rgba(0, 0, 0, 0.08);
+    --shadow-lifted: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* ====== General Reset ====== */
-* {
-  box-sizing: border-box;
-  font-family: 'Inter', Arial, Helvetica, sans-serif;
-  transition: background 0.3s, color 0.3s;
-}
-
-
-/* ====== Fixed Top Navbar ====== */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: var(--card-light);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  z-index: 10000;
-  flex-wrap: wrap;
-}
-
-.navbar .title-container {
-  flex: 1;
-  text-align: center;
-  display: flex;          /* Make container a flex box */
-  flex-direction: column; /* Stack h1 and p vertically */
-  justify-content: center;
-  align-items: center;
-}
-
-.navbar h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: bold;
-}
-
-.navbar .tagline {
-  margin: 2px 0 0 0; /* small spacing below title */
-  font-size: 12px;
-  color: var(--muted-light);
-}
-
-
-/* Back button & theme toggle */
-.navbar .back-btn,
-.navbar .theme-toggle {
-  flex-shrink: 0;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: none;
-}
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--bg-light);
-  transition: background 0.3s, color 0.3s;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Verdana, sans-serif;
+    color: var(--text-dark);
+    text-align: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: 
+        radial-gradient(var(--pastel-blue) 1px, transparent 1px),
+        linear-gradient(135deg, var(--bg-light) 0%, var(--pastel-mint) 100%);
+    background-size: 30px 30px; 
+    background-attachment: fixed;
 }
 
-.main-content {
-  width: 100%;
-  max-width: 1100px;
-  padding: 20px;
-  margin-top: 80px; /* make sure it clears the fixed navbar */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
+header {
+    padding: 30px 20px;
+    background: rgba(255, 255, 255, 0.85); 
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--accent-color);
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    z-index: 10;
 }
 
-#game {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
+.games-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-#score, #nextBtn, #restartBtn {
-  margin-top: 10px;
+.game-card {
+    position: relative;
+    background: #ffffff; 
+    border-radius: 12px;
+    padding: 30px;
+    transition: all 0.4s ease-in-out;
+    cursor: pointer;
+    box-shadow: var(--shadow-subtle);
+    border: 1px solid var(--pastel-blue);
 }
 
-
-/* ====== Buttons ====== */
-button, .btn, select {
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.2s ease;
+.game-card:hover {
+    background: var(--pastel-mint);
+    transform: translateY(-5px); 
+    box-shadow: var(--shadow-lifted);
 }
 
-button:hover, .btn:hover, select:hover {
-  transform: translateY(-2px);
+.game-card h2 {
+    margin: 0 0 10px;
+    font-size: 1.6rem;
+    color: var(--accent-color);
+    transition: color 0.3s;
 }
 
-/* ====== Cards / Grid / Game ====== */
-.card, .state-box, .element-tile, .word-tile, .option {
-  border-radius: 12px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.3s ease;
+.game-card p {
+    font-size: 1rem;
+    color: var(--text-dark);
 }
 
-.cardInner {
-  position: absolute;
-  inset: 0;
-  border-radius: 10px;
-  transition: transform .45s;
-  transform-style: preserve-3d;
+.game-card a, .footer a, .game-tile {
+    display: inline-block;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.card.flipped .cardInner {
-  transform: rotateY(180deg);
+.game-card a, .footer a {
+    margin-top: 15px;
+    background: var(--accent-color);
+    color: var(--bg-light);
+    box-shadow: 0 4px 0 var(--text-dark);
 }
 
-.cardFace {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  padding: 10px;
+.game-card a:hover, .footer a:hover {
+    background: var(--pastel-lavender);
+    color: var(--text-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 var(--text-dark);
 }
 
-.front { border: 1px solid rgba(0,0,0,0.03); }
-.back { transform: rotateY(180deg); font-weight: 700; }
-
-/* ====== Draggable / Droppable ====== */
-.draggable-state, .element-tile, .word-tile, .option {
-  user-select: none;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+.game-card a:active, .footer a:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--text-dark); 
 }
 
-.category-container, .sentence-container, .droppable, .draggable-words-container, .draggable-elements-container {
-  border: 2px dashed #9ca3af;
-  border-radius: 1rem;
-  padding: 1rem;
-  min-height: 80px;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s, border-color 0.3s;
+.game-tile {
+    background: var(--pastel-pink);
+    border: 2px solid var(--pastel-lavender);
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    width: 60px; 
+    height: 60px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); 
+    margin: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* ====== Feedback ====== */
-.correct, .correct-border { border-color: var(--success); }
-.incorrect, .incorrect-border { border-color: var(--error); }
-
-/* ====== Modals ====== */
-.modal, .modal-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  background-color: rgba(0,0,0,0.6);
+.game-tile:hover {
+    background: var(--pastel-blue);
+    transform: scale(1.05) rotate(1deg);
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3); /* Stronger depth on hover */
 }
 
-.modal-content, .modal-container.show .modal-content {
-  background-color: var(--card-light);
-  padding: 2rem;
-  border-radius: 1rem;
-  text-align: center;
-  box-shadow: 0 20px 25px rgba(0,0,0,0.2);
-  width: 90%;
-  max-width: 500px;
-  border: 2px solid #e5e7eb;
+.footer {
+    margin-top: 40px;
+    padding-bottom: 30px;
 }
 
-/* ====== Utility Classes ====== */
-.hidden { display: none; }
-.small { font-size: 13px; }
-
-/* ====== Responsive ====== */
-@media(max-width:760px){ .game {grid-template-columns:repeat(3,1fr);} .card{height:90px;} }
-@media(max-width:420px){ .game {grid-template-columns:repeat(2,1fr);} .card{height:80px;} }
-
-/* ====== Light Mode ====== */
-body.light-mode {
-  background-color: var(--bg-light);
-  color: #1f2937;
+@media (max-width: 768px) {
+    header {
+        padding: 20px 10px;
+        font-size: 1.6rem;
+    }
+    .games-container {
+        grid-template-columns: 1fr;
+        padding: 30px 15px;
+        gap: 20px;
+    }
+    .game-card {
+        padding: 25px;
+    }
 }
 
-body.light-mode .card, body.light-mode .state-box, body.light-mode .element-tile, body.light-mode .word-tile, body.light-mode .option {
-  background-color: var(--card-light);
-  color: #1f2937;
-}
-
-body.light-mode .front { background-color: var(--glass-light); }
-body.light-mode .back { color: var(--gold); }
-
-body.light-mode button, body.light-mode .btn, body.light-mode select {
-  background-color: var(--card-light);
-  color: var(--accent-light);
-}
-
-body.light-mode .navbar {
-  background-color: var(--card-light);
-  color: var(--accent-light);
-}
-
-body.light-mode .navbar .tagline {
-  color: var(--muted-light);
-}
-
-/* ====== Dark Mode ====== */
-body.dark-mode {
-  background-color: var(--bg-dark);
-  color: #e6eef8;
-}
-
-body.dark-mode .card, body.dark-mode .state-box, body.dark-mode .element-tile, body.dark-mode .word-tile, body.dark-mode .option {
-  background-color: var(--glass-dark);
-  color: #e6eef8;
-}
-
-body.dark-mode .front { background-color: var(--glass-dark); }
-body.dark-mode .back { color: var(--gold); }
-
-body.dark-mode button, body.dark-mode .btn, body.dark-mode select {
-  background-color: var(--card-dark);
-  color: var(--accent-dark);
-}
-
-body.dark-mode .navbar {
-  background-color: var(--card-dark);
-  color: var(--accent-dark);
-}
-
-body.dark-mode .navbar .tagline {
-  color: var(--muted-dark);
-}
