@@ -1,218 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Student Dashboard</title>
-<style>
-body {
-  background: #0a192f;
-  color: #fff;
-  font-family: "Trebuchet MS", Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  transition: background 0.3s, color 0.3s;
-}
-
-.container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
-}
-
-.navbar {
-  background: #112240;
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  transition: background 0.3s, color 0.3s;
-}
-.navbar h1 { margin: 0; font-size: 20px; color: #4fc3f7; }
-.navbar a, .theme-toggle-navbar {
-  text-decoration: none;
-  background: #4fc3f7;
-  color: #0a192f;
-  padding: 8px 14px;
-  border-radius: 6px;
-  font-weight: bold;
-  transition: 0.3s;
-  margin-left: 10px;
-  cursor: pointer;
-}
-.navbar a:hover, .theme-toggle-navbar:hover { background: #1dd1a1; color: #fff; }
-
-.box { 
-  border-radius: 16px; 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.3); 
-  padding: 20px; 
-  margin-bottom: 25px;
-  transition: background 0.3s, color 0.3s;
-}
-
-.greeting-box { background: linear-gradient(135deg, #4fc3f7, #1dd1a1); text-align: center; }
-.greeting-box h2 { font-size: 22px; margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.greeting-box .username { font-weight: bold; }
-.greeting-box p { font-size: 14px; opacity: 0.9; }
-
-.extra-features-box { background: #112240; }
-.feature { background: #1c2d4a; margin-bottom: 15px; padding: 15px; }
-.feature h3 { margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid #4fc3f7; display: inline-block; padding-bottom: 3px; }
-.search-box { display: flex; }
-.search-box input { flex: 1; padding: 8px; border-radius: 6px 0 0 6px; border: none; outline: none; }
-.search-box button { background: #4fc3f7; border: none; padding: 8px 12px; border-radius: 0 6px 6px 0; cursor: pointer; font-weight: bold; }
-
-.notifications, .leaderboard { list-style: none; padding: 0; font-size: 14px; }
-.notifications li, .leaderboard li { background: #243b61; padding: 6px 10px; border-radius: 8px; margin: 5px 0; }
-
-.demo-leaderboard { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-.demo-box, .leaderboard-box { flex: 1 1 300px; text-align: center; padding: 20px; }
-.demo-box h2, .leaderboard-box h2 { font-size: 22px; margin-bottom: 15px; color: #4fc3f7; }
-.demo-links { display: flex; flex-direction: column; gap: 12px; }
-.demo-links a { text-decoration: none; background: #4fc3f7; color: #0a192f; padding: 12px; border-radius: 10px; font-weight: bold; transition: 0.3s ease; }
-.demo-links a:hover { background: #1dd1a1; color: #fff; transform: scale(1.05); }
-
-.footer { background: #112240; color: #fff; padding: 40px 20px 20px; font-family: Arial, sans-serif; transition: background 0.3s, color 0.3s; }
-.footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: auto; }
-.footer-section h3 { margin-bottom: 10px; font-size: 18px; border-bottom: 2px solid #4fc3f7; display: inline-block; padding-bottom: 5px; }
-.footer-section p, .footer-section ul { font-size: 14px; line-height: 1.6; }
-.footer-section ul { list-style: none; padding: 0; }
-.footer-section ul li { margin: 5px 0; }
-.footer-section ul li a { color: #bbb; text-decoration: none; transition: color 0.3s; }
-.footer-section ul li a:hover { color: #4fc3f7; }
-.social-links a { margin-right: 10px; font-size: 20px; color: #bbb; text-decoration: none; transition: color 0.3s; }
-.social-links a:hover { color: #4fc3f7; }
-.footer-bottom { text-align: center; margin-top: 20px; font-size: 13px; border-top: 1px solid #444; padding-top: 10px; color: #bbb; }
-
-body.light-mode {
-  background: #f1f1f1;
-  color: #000;
-}
-body.light-mode .navbar { background: #d1d1d1; color: #000; }
-body.light-mode .navbar h1 { color: #0a192f; }
-body.light-mode .navbar a, body.light-mode .theme-toggle-navbar { background: #0a7dff; color: #fff; }
-body.light-mode .navbar a:hover, body.light-mode .theme-toggle-navbar:hover { background: #4fc3f7; color: #0a192f; }
-body.light-mode .footer { background: #d1d1d1; color: #000; }
-body.light-mode .footer-section ul li a { color: #0a192f; }
-body.light-mode .footer-section ul li a:hover { color: #0a7dff; }
-body.light-mode .greeting-box { background: #81cfe0; color: #0a192f; }
-body.light-mode .extra-features-box { background: #cfd8e0; color: #0a192f; }
-body.light-mode .feature { background: #b0c4de; color: #0a192f; }
-body.light-mode .demo-box, body.light-mode .leaderboard-box { background: #b0c4de; color: #0a192f; }
-body.light-mode .demo-links a { background: #0a7dff; color: #fff; }
-body.light-mode .demo-links a:hover { background: #4fc3f7; color: #0a192f; }
-body.light-mode .notifications li, body.light-mode .leaderboard li { background: #dbe2ef; color: #0a192f; }
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Student Dashboard - PWA</title>
+    <link rel="stylesheet" href="dashstudent.css">
+    <link rel="icon" href="">
 </head>
-<body class="dark-mode">
-<div class="navbar">
-  <h1>📚 Student Portal</h1>
-  <div>
-    <button class="theme-toggle-navbar" onclick="toggleTheme()">🌙 Dark Mode</button>
-    <a href="index.html">Back to Login</a>
-  </div>
+
+<body class="light-theme">
+
+<div id="messageModal" class="modal-backdrop hidden">
+    <div class="modal-content">
+        <h3 id="modalTitle">Feature Activated</h3>
+        <p id="modalMessage">This feature simulates a working link. Success!</p>
+        <button onclick="closeModal()">Close</button>
+    </div>
 </div>
 
-<div class="container">
-  <div class="greeting-box box">
-    <h2>Welcome back, <span class="username">Ojashwa Mishra</span> 🎉</h2>
-    <p>Class: 12 • Section: A • Roll No: 11</p>
-  </div>
+<nav class="navbar">
+    <div class="navbar-content">
+        <h1><span class="icon">🎓</span> Student Portal</h1>
+        <div class="nav-actions">
+            <button id="languageToggleBtn" class="nav-button language-toggle-btn">
+                <span class="icon">🌐</span> EN/ଓଡ଼ିଆ
+            </button>
+            <button id="themeToggleBtn" class="nav-button theme-toggle-btn">
+                <span class="icon">🌙</span> Dark Mode
+            </button>
+            <a href="index.html" class="nav-button">Logout</a>
+        </div>
+    </div>
+</nav>
 
-  <div class="extra-features-box box">
-    <h2>✨ Extra Features</h2>
-    <div class="feature">
-      <h3>🔍 Quick Search</h3>
-      <div class="search-box">
-        <input type="text" placeholder="Search notes, assignments..." />
-        <button>Go</button>
-      </div>
-    </div>
-    <div class="feature">
-      <h3>📢 Notifications</h3>
-      <ul class="notifications">
-        <li>Science Quiz on 25 Sept</li>
-        <li>Math Assignment due tomorrow</li>
-        <li>Annual Sports Meet next week</li>
-      </ul>
-    </div>
-  </div>
+<main class="container">
+    <h1 class="section-title-main">Dashboard Overview</h1>
 
-  <div class="demo-leaderboard">
-    <div class="demo-box box">
-      <h2>🎮 Demo Zone</h2>
-      <div class="demo-links">
-        <a href="demogames.html">🕹 Demo Games</a>
-        <a href="demoquiz.html">❓ Demo Quiz</a>
-        <a href="demopuzzle.html">🧩 Demo Puzzle</a>
-      </div>
-    </div>
+    <div class="dashboard-grid">
 
-    <div class="leaderboard-box box">
-      <h2>🏆 Leaderboard</h2>
-      <ol class="leaderboard">
-        <li>🥇 Laxmi (Roll no. 9)</li>
-        <li>🥈 Aanya (Roll no. 10)</li>
-        <li>🥉 Samridhi (Roll no. 8)</li>
-      </ol>
-    </div>
-  </div>
-</div>
+        <div class="col-left">
 
-<footer class="footer">
-  <div class="footer-container">
-    <div class="footer-section">
-      <h3>About</h3>
-      <p>Student Portal for Classes 6–12. Access study materials, assignments, exams, and progress reports in one place.</p>
-    </div>
-    <div class="footer-section">
-      <h3>Quick Links</h3>
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Subjects</a></li>
-        <li><a href="#">Assignments</a></li>
-        <li><a href="#">Exams</a></li>
-      </ul>
-    </div>
-    <div class="footer-section">
-      <h3>Contact</h3>
-      <p>Email: support@schoolportal.com</p>
-      <p>Phone: +91-9876543210</p>
-      <p>Address: Sagar Public School, Bhopal</p>
-    </div>
-    <div class="footer-section">
-      <h3>Follow Us</h3>
-      <div class="social-links">
-        <a href="#">🌐</a>
-        <a href="#">📘</a>
-        <a href="#">🐦</a>
-        <a href="#">📸</a>
-      </div>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>© 2025 School Portal. All Rights Reserved.</p>
-  </div>
-</footer>
+            <section class="card core-info-card" id="coreStudentInfoCard">
+                <div class="profile-details">
+                    <img src="https://placehold.co/80x80/2980b9/ffffff?text=O.M." alt="Student Avatar" class="profile-avatar">
+                    <div class="profile-text">
+                        <h3 id="studentName">Ojashwa Mishra</h3>
+                        <p class="subtitle">Class: <span id="studentClass">12</span> • Section: <span id="studentSection">A</span> • Roll No: <span id="studentRollNo">11</span></p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="card feature-card" id="featuresCard">
+                <h2><span class="icon">✨</span> Alerts & Tools</h2>
+                
+                <div class="tool-section">
+                    <h3 class="tool-title"><span class="icon">🔍</span> Quick Search</h3>
+                    <div class="search-box">
+                        <input type="text" id="searchInput" placeholder="Search notes, assignments..." />
+                        <button class="btn-primary"><span class="icon">🔎</span></button>
+                    </div>
+                </div>
 
-<script>
-function toggleTheme(){
-  const body = document.body;
-  const btn = document.querySelector(".theme-toggle-navbar");
-  if(body.classList.contains("dark-mode")){
-    body.classList.remove("dark-mode");
-    body.classList.add("light-mode");
-    btn.textContent = "🌙 Dark Mode";
-  } else {
-    body.classList.remove("light-mode");
-    body.classList.add("dark-mode");
-    btn.textContent = "☀ Light Mode";
-  }
-}
-</script>
+                <div class="tool-section">
+                    <h3 class="tool-title"><span class="icon">📢</span> Notifications</h3>
+                    <ul id="notificationsList" class="notifications">
+                        <li class="alert alert-yellow"><span class="icon">🗓️</span> Science Quiz on 25 Sept</li>
+                        <li class="alert alert-red"><span class="icon">⚠️</span> Math Assignment due tomorrow</li>
+                        <li class="alert alert-blue"><span class="icon">🔔</span> Annual Sports Meet next week</li>
+                    </ul>
+                </div>
+            </section>
+
+            <div class="mini-card-grid">
+                <section class="card demo-card" id="demoZoneCard">
+                    <h3><span class="icon">🕹️</span> Demo Zone</h3>
+                    <div class="demo-links">
+                        <a href="demogames.html" class="demo-link" data-feature="Game">🕹 Games</a>
+                        <a href="demoquiz.html" class="demo-link" data-feature="Quiz">❓ Quiz</a>
+                        <a href="demopuzzle.html" class="demo-link" data-feature="Puzzle">🧩 Puzzle</a>
+                    </div>
+                </section>
+
+                <section class="card leaderboard-card" id="leaderboardCard">
+                    <h3><span class="icon">🏆</span> Leaderboard</h3>
+                    <ol class="leaderboard-list">
+                        <li>🥇 Laxmi (Roll no. 9)</li>
+                        <li>🥈 Aanya (Roll no. 10)</li>
+                        <li>🥉 Samridhi (Roll no. 8)</li>
+                    </ol>
+                </section>
+            </div>
+            
+        </div>
+
+        <div class="col-right">
+            <section class="card academic-card" id="academicSection">
+                <h2><span class="icon">📊</span> Academic Performance</h2>
+
+                <div id="gradeCardsContainer" class="grade-cards-grid">
+                    <div class="grade-card grade-physics" data-percentage="75">
+                        <h3>Physics</h3>
+                        <div class="progress-arc-container">
+                             <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="circle circle-physics" stroke-dasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <text x="18" y="20.35" class="percentage-text">75%</text>
+                            </svg>
+                        </div>
+                        <p class="grade-footer"><span class="icon">⬆️</span> Improvement: +5%</p>
+                    </div>
+
+                    <div class="grade-card grade-maths" data-percentage="90">
+                        <h3>Maths</h3>
+                        <div class="progress-arc-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="circle circle-maths" stroke-dasharray="90, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <text x="18" y="20.35" class="percentage-text">90%</text>
+                            </svg>
+                        </div>
+                        <p class="grade-footer"><span class="icon">⬆️</span> Improvement: +8%</p>
+                    </div>
+
+                    <div class="grade-card grade-english" data-percentage="60">
+                        <h3>English</h3>
+                        <div class="progress-arc-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <path class="circle circle-english" stroke-dasharray="60, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                                <text x="18" y="20.35" class="percentage-text">60%</text>
+                            </svg>
+                        </div>
+                        <p class="grade-footer"><span class="icon">⬆️</span> Improvement: +2%</p>
+                    </div>
+                </div>
+
+                <div class="skill-badges">
+                    <h3><span class="icon">🌟</span> Skill Badges</h3>
+                    <div class="badges-list">
+                        <span class="badge badge-purple">🏆 Top Performer - Physics</span>
+                        <span class="badge badge-pink">💡 Creative Thinker - English</span>
+                        <span class="badge badge-indigo">🚀 Fast Solver - Maths</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card habit-tracker-card" id="goalTrackerSection">
+                <h2><span class="icon">🎯</span> Goals & Habit Tracker</h2>
+
+                <div class="habit-content-grid">
+                    <div class="goal-list-container">
+                        <h3>Goal Progress</h3>
+                        <form id="goalForm" class="input-with-button">
+                            <input type="text" id="goalInput" placeholder="e.g., Improve Physics by 10%" required />
+                            <button type="submit" class="btn-accent-sm">Add</button>
+                        </form>
+                        <ul id="goalList" class="goal-items">
+                            <li class="goal-item-complete">Improve Physics by 10% <span class="goal-progress-badge complete">Complete</span></li>
+                            <li class="goal-item-pending">Finish novel reading <span class="goal-progress-badge pending">50%</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="habit-circle-container">
+                        <h3>Habit Circle</h3>
+                        <canvas id="habitCircle" width="300" height="300"></canvas>
+                        <div class="habit-inputs">
+                            <label>Study Hours: <input type="number" id="habitStudyHours" value="2" min="0" /></label>
+                            <label>Screen Time: <input type="number" id="screenTimeInput" value="4" min="0" /></label>
+                            <label>Reading Time: <input type="number" id="readingTimeInput" value="1" min="0" /></label>
+                            <button id="updateHabitsBtn" class="btn-accent">Update Habits</button>
+                        </div>
+                    </div>
+
+                    <!-- Streak System -->
+                    <div class="streak-system-container">
+                        <h3>🔥 Streak System</h3>
+                        <div class="streak-grid">
+                            <div id="studyStreak" class="streak-item streak-red">
+                                <p class="text-sm font-semibold">📖 Study</p>
+                                <span class="days" data-count="3">3</span>
+                                <span class="text-sm">days</span>
+                            </div>
+                            <div id="attendanceStreak" class="streak-item streak-yellow">
+                                <p class="text-sm font-semibold">📝 Attendance</p>
+                                <span class="days" data-count="15">15</span>
+                                <span class="text-sm">days</span>
+                            </div>
+                            <div id="readingStreak" class="streak-item streak-indigo">
+                                <p class="text-sm font-semibold">📚 Reading</p>
+                                <span class="days" data-count="7">7</span>
+                                <span class="text-sm">days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. Smart Planner (Styling fixed) -->
+            <section class="card planner-card" id="smartPlannerSection">
+                <h2><span class="icon">📅</span> Smart Planner</h2>
+
+                <div class="planner-layout">
+                    <div class="planner-column">
+                        <h3 class="planner-title">Today's Schedule</h3>
+                        <ul class="schedule-list">
+                            <li><span class="time">08:00</span> Math Class <span class="label label-blue">Live</span></li>
+                            <li><span class="time">11:00</span> Science Project <span class="label label-yellow">Group Work</span></li>
+                            <li><span class="time">15:00</span> Reading Time <span class="label label-green">Personal</span></li>
+                        </ul>
+                    </div>
+                    <div class="planner-column">
+                        <h3 class="planner-title">Upcoming Deadlines</h3>
+                        <ul class="deadline-list">
+                            <li class="urgent"><span class="date">Sept 27</span> History Essay</li>
+                            <li><span class="date">Oct 05</span> Physics Lab Report</li>
+                            <li><span class="date">Oct 10</span> English Presentation</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<script src="dashstudent.js"></script>
+
 </body>
 </html>
+
+
