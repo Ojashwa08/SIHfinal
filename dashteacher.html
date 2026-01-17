@@ -3,118 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Portal | Welcome back</title>
+    <title>EduPulse | Teacher Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="dashteacher.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="dashteacher.js" defer></script>
 </head>
 <body>
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">EP</div>
+                <h2>EduPulse</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link active"><span>📊</span> Overview</a>
+                <a href="#" class="nav-link"><span>👥</span> Students</a>
+                <a href="#" class="nav-link"><span>📝</span> Grading</a>
+                <a href="#" class="nav-link"><span>⚙️</span> Settings</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="btn btn-danger-soft" id="clearAllBtn">Reset Database</button>
+            </div>
+        </aside>
 
-    <nav class="sidebar" aria-label="Main Navigation">
-        <div class="sidebar-brand">
-            <div class="logo-icon"></div>
-            <h2>EduPulse</h2>
+        <!-- Main Content -->
+        <main class="main-area">
+            <header class="main-header">
+                <div>
+                    <h1>Teacher Dashboard</h1>
+                    <p id="headerSubtext">Manage your students and track real-time performance.</p>
+                </div>
+                <div class="header-btns">
+                    <button class="btn btn-secondary" id="exportBtn">Export CSV</button>
+                    <button class="btn btn-primary" id="openModalBtn">+ Add Student</button>
+                </div>
+            </header>
+
+            <!-- Stats Overview -->
+            <section class="stats-row">
+                <div class="stat-card">
+                    <label>Total Students</label>
+                    <h3 id="statTotal">0</h3>
+                </div>
+                <div class="stat-card">
+                    <label>Average Score</label>
+                    <h3 id="statAvg">0%</h3>
+                    <div class="progress-container"><div id="avgBar" class="progress-fill"></div></div>
+                </div>
+                <div class="stat-card">
+                    <label>Class Pass Rate</label>
+                    <h3 id="statPassRate">0%</h3>
+                </div>
+                <div class="stat-card">
+                    <label>High Risk Students</label>
+                    <h3 id="statRiskCount" class="text-danger">0</h3>
+                </div>
+            </section>
+
+            <!-- Charts Row -->
+            <section class="charts-row">
+                <div class="card chart-box">
+                    <h4>Score Distribution</h4>
+                    <canvas id="scoreChart"></canvas>
+                </div>
+                <div class="card chart-box">
+                    <h4>Pass/Fail Ratio</h4>
+                    <canvas id="passChart"></canvas>
+                </div>
+                <div class="card chart-box">
+                    <h4>Attendance vs Score</h4>
+                    <canvas id="scatterChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Table Section -->
+            <section class="table-container card">
+                <div class="table-toolbar">
+                    <h4>Student Registry</h4>
+                    <input type="text" id="searchInput" placeholder="Search name or roll no...">
+                </div>
+                <div class="scroll-wrapper">
+                    <table id="mainTable">
+                        <thead>
+                            <tr>
+                                <th>Roll No</th>
+                                <th>Name</th>
+                                <th>Score</th>
+                                <th>Attendance</th>
+                                <th>Focus</th>
+                                <th>Risk</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+                <div id="noData" class="empty-msg hidden">No students found. Add your first student to begin!</div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Student</h2>
+                <span class="close-modal">&times;</span>
+            </div>
+            <form id="studentForm">
+                <input type="hidden" id="editIndex">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Roll Number</label>
+                        <input type="text" id="rollNo" required placeholder="e.g. 101">
+                    </div>
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName" required placeholder="e.g. John Doe">
+                    </div>
+                    <div class="input-group">
+                        <label>Attendance %</label>
+                        <input type="number" id="attendance" min="0" max="100" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Current Score (%)</label>
+                        <input type="number" id="score" min="0" max="100" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Academic Screen Time (Mins)</label>
+                        <input type="number" id="acadTime" min="0" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Idle Screen Time (Mins)</label>
+                        <input type="number" id="idleTime" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary w-full" id="saveBtn">Save Student</button>
+                </div>
+            </form>
         </div>
-        <ul class="nav-links">
-            <li><a href="#" class="active" aria-current="page">Overview</a></li>
-            <li><a href="#">Students</a></li>
-            <li><a href="#">Curriculum</a></li>
-            <li><a href="#">Reports</a></li>
-            <li><a href="#">Settings</a></li>
-        </ul>
-        <div class="sidebar-footer">
-            <p>System v2.5</p>
-        </div>
-    </nav>
+    </div>
 
-    <main class="main-content">
-        <header class="top-header">
-            <div class="welcome-text">
-                <h1>Good morning, Teacher</h1>
-                <p>Here is what’s happening with your classes today.</p>
-            </div>
-            <div class="header-actions">
-                <button id="extractBtn" class="btn btn-secondary">Download Report</button>
-                <a href="index.html" class="btn btn-primary">Sign Out</a>
-            </div>
-        </header>
-
-        <section class="stats-grid" aria-label="Quick Statistics">
-            <div class="stat-card">
-                <span class="stat-label">Total Students</span>
-                <h2 class="stat-value">30</h2>
-                <div class="stat-trend up">↑ 2 new this week</div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Average Score</span>
-                <h2 class="stat-value">68%</h2>
-                <div class="progress-bar-mini"><div style="width: 68%"></div></div>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Highest Score</span>
-                <h2 class="stat-value">95%</h2>
-                <p class="stat-subtext">Class 10-B</p>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Pass Rate</span>
-                <h2 class="stat-value">75%</h2>
-                <div class="stat-trend">Target: 80%</div>
-            </div>
-        </section>
-
-        <section class="charts-container">
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3>Score Distribution</h3>
-                    <p>Frequency of scores across all sections</p>
-                </div>
-                <canvas id="barChart"></canvas>
-            </div>
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3>Learning Outcomes</h3>
-                    <p>Pass vs. Fail Ratio</p>
-                </div>
-                <div class="pie-wrapper">
-                    <canvas id="pieChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <section class="table-section">
-            <div class="table-toolbar">
-                <h3>Student Performance</h3>
-                <div class="search-wrapper">
-                    <input type="text" id="searchInput" placeholder="Search by name or roll number..." aria-label="Search students">
-                </div>
-            </div>
-            
-            <div class="table-responsive">
-                <table id="studentTable">
-                    <thead>
-                        <tr>
-                            <th>Roll No</th>
-                            <th>Student Name</th>
-                            <th>Current Score</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>101</td><td>Rahul Sharma</td><td>85</td><td><span class="badge badge-pass">Pass</span></td></tr>
-                        <tr><td>102</td><td>Priya Das</td><td>60</td><td><span class="badge badge-pass">Pass</span></td></tr>
-                        <tr><td>103</td><td>Amit Patel</td><td>35</td><td><span class="badge badge-fail">Fail</span></td></tr>
-                        <tr><td>104</td><td>Sara Khan</td><td>78</td><td><span class="badge badge-pass">Pass</span></td></tr>
-                        <tr><td>105</td><td>Arjun V.</td><td>55</td><td><span class="badge badge-pass">Pass</span></td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="emptyState" class="empty-state hidden">
-                <p>No students match your search criteria.</p>
-                <button onclick="document.getElementById('searchInput').value=''; location.reload();">Clear Search</button>
-            </div>
-        </section>
-    </main>
-
+    <script src="dashteacher.js"></script>
 </body>
 </html>
